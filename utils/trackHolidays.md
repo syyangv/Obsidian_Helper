@@ -1,0 +1,690 @@
+
+```dataviewjs
+(async () => {
+    // ===== PREVENT MULTIPLE SIMULTANEOUS EXECUTIONS =====
+    const actualCurrentFile = app.workspace.getActiveFile();
+
+    if (!actualCurrentFile) {
+        dv.paragraph("⚠️ No active file detected.");
+        return;
+    }
+
+    const containerId = 'track-holidays-' + actualCurrentFile.path;
+
+    // If already running, skip this execution
+    if (window[containerId + '_running']) {
+        return;
+    }
+
+    // Set debounce timeout - only execute after 500ms of inactivity
+    if (window[containerId + '_timeout']) {
+        clearTimeout(window[containerId + '_timeout']);
+    }
+
+    await new Promise(resolve => {
+        window[containerId + '_timeout'] = setTimeout(resolve, 500);
+    });
+
+    window[containerId + '_running'] = true;
+
+    try {
+        
+        let actualCurrentPage;
+        try {
+            actualCurrentPage = dv.page(actualCurrentFile.path);
+        } catch (e) {
+            dv.paragraph("⚠️ Unable to read page data.");
+            return;
+        }
+        
+        if (!actualCurrentPage) {
+            dv.paragraph("⚠️ Unable to read page data.");
+            return;
+        }
+
+        // Get the year from the actual current note's title
+        const noteTitle = actualCurrentFile.name || "";
+        const yearMatch = noteTitle.match(/\d{4}/);
+        const year = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
+
+        // Get annual leave limit from the ACTUAL current file's frontmatter (with safe access)
+        const annualLeaveLimit = Number(actualCurrentPage.annualPtoCount) || 0;
+
+        // ========================================
+        // 缓存工具函数 Cache Utility Functions
+        // ========================================
+        const CACHE_KEY = 'track-holidays-data-v1';
+        const CACHE_TTL_MINUTES = 240;
+
+        const loadFromCache = (forYear) => {
+            try {
+                const raw = localStorage.getItem(CACHE_KEY);
+                if (!raw) return null;
+                const data = JSON.parse(raw);
+                if (data.year !== forYear) return null;
+                const ageMinutes = (Date.now() - data.timestamp) / 60000;
+                if (ageMinutes > CACHE_TTL_MINUTES) return null;
+                return {
+                    monthlyData: data.monthlyData,
+                    monthlyDetails: data.monthlyDetails,
+                    holidayRecords: data.holidayRecords,
+                    cachedAt: new Date(data.timestamp)
+                };
+            } catch (e) { return null; }
+        };
+
+        const saveToCache = (forYear, mData, mDetails, hRecords) => {
+            try {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({
+                    timestamp: Date.now(),
+                    year: forYear,
+                    monthlyData: mData,
+                    monthlyDetails: mDetails,
+                    holidayRecords: hRecords
+                }));
+            } catch (e) {}
+        };
+
+        const clearCache = () => {
+            try { localStorage.removeItem(CACHE_KEY); } catch (e) {}
+        };
+
+        // Initialize monthly data structure for the specified year
+        const months = Array.from({length: 12}, (_, i) => {
+            const month = (i + 1).toString().padStart(2, '0');
+            return `${year}-${month}`;
+        });
+
+        // Helper function to get type display name and color (used in both cached and non-cached paths)
+        function getTypeInfo(type) {
+            switch(type) {
+                case 'pto': return { name: 'PTO', color: '#3498db', bg: '#3498db20' };
+                case 'public': return { name: '公共假期', color: '#f39c12', bg: '#f39c1220' };
+                case 'sick': return { name: '病假', color: '#e74c3c', bg: '#e74c3c20' };
+                default: return { name: type, color: '#888', bg: '#88888820' };
+            }
+        }
+
+        let monthlyData, monthlyDetails, holidayRecords;
+        let cachedAt = null;
+
+        const cached = loadFromCache(year);
+        if (cached) {
+            ({ monthlyData, monthlyDetails, holidayRecords, cachedAt } = cached);
+        } else {
+
+        // Get all pages from 日记 folder with date format for the specified year
+        let pages = [];
+        try {
+            const allPages = dv.pages('"日记"');
+            if (allPages && allPages.length > 0) {
+                pages = allPages
+                    .where(p => {
+                        try {
+                            return p && p.file && p.file.name &&
+                                   typeof p.file.name === 'string' &&
+                                   p.file.name.match(new RegExp(`^${year}-\\d{2}-\\d{2}`));
+                        } catch (e) {
+                            return false;
+                        }
+                    })
+                    .sort(p => p.file.name);
+            }
+        } catch (e) {
+            dv.paragraph("⚠️ Error reading diary folder. Make sure '日记' folder exists.");
+            return;
+        }
+
+        monthlyData = {};
+
+        // Initialize all months with 0
+        months.forEach(month => {
+            monthlyData[month] = 0;
+        });
+
+        // Count holidays by month and track types
+        monthlyDetails = {};
+        months.forEach(month => {
+            monthlyDetails[month] = {
+                total: 0,
+                pto: 0,
+                public: 0,
+                sick: 0
+            };
+        });
+
+        // Store individual holiday records for the list
+        holidayRecords = [];
+
+        // Day of week names
+        const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+
+        // Helper function to safely get string value
+        function safeString(val) {
+            if (val === null || val === undefined) return '';
+            try {
+                return String(val).trim();
+            } catch (e) {
+                return '';
+            }
+        }
+
+        // Helper function to safely get array
+        function safeArray(val) {
+            if (val === null || val === undefined) return [];
+            if (Array.isArray(val)) return val;
+            try {
+                return [val];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        // Helper function to get day of week (timezone-safe)
+        function getDayOfWeek(dateStr) {
+            try {
+                // Parse date parts manually to avoid timezone issues
+                const parts = dateStr.split('-');
+                if (parts.length !== 3) return '?';
+                const yr = parseInt(parts[0], 10);
+                const mo = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
+                const dy = parseInt(parts[2], 10);
+                
+                // Create date using local timezone
+                const date = new Date(yr, mo, dy);
+                if (isNaN(date.getTime())) return '?';
+                return dayNames[date.getDay()];
+            } catch (e) {
+                return '?';
+            }
+        }
+
+        // Helper function to normalize 假期 frontmatter to array
+        function getHolidayTypes(page) {
+            const holidayTypes = new Set();
+            
+            try {
+                // Check frontmatter 假期 property
+                if (page && page.假期) {
+                    const jiaqiArray = safeArray(page.假期);
+                    jiaqiArray.forEach(val => {
+                        const strVal = safeString(val);
+                        if (strVal === 'PTO' || strVal === '放假/PTO') {
+                            holidayTypes.add('pto');
+                        } else if (strVal === '公共假期' || strVal === '放假/公共假期') {
+                            holidayTypes.add('public');
+                        } else if (strVal === '病假' || strVal === '放假/病假') {
+                            holidayTypes.add('sick');
+                        }
+                    });
+                }
+                
+                // Check tags
+                if (page && page.file && page.file.tags && Array.isArray(page.file.tags)) {
+                    page.file.tags.forEach(tag => {
+                        const strTag = safeString(tag);
+                        if (strTag === '#放假/PTO' || strTag === '放假/PTO') {
+                            holidayTypes.add('pto');
+                        } else if (strTag === '#放假/公共假期' || strTag === '放假/公共假期') {
+                            holidayTypes.add('public');
+                        } else if (strTag === '#放假/病假' || strTag === '放假/病假') {
+                            holidayTypes.add('sick');
+                        }
+                    });
+                }
+            } catch (e) {
+                // Silently fail for individual page errors
+            }
+            
+            return holidayTypes;
+        }
+
+        // Process pages
+        for (let page of pages) {
+            try {
+                // Skip malformed pages
+                if (!page || !page.file || !page.file.name) {
+                    continue;
+                }
+                
+                const fileName = safeString(page.file.name);
+                if (fileName.length < 10) continue; // YYYY-MM-DD is 10 chars
+                
+                const holidayTypes = getHolidayTypes(page);
+                const month = fileName.substring(0, 7); // YYYY-MM
+                const dateStr = fileName.substring(0, 10); // YYYY-MM-DD
+                
+                if (monthlyData[month] === undefined) continue;
+                
+                // Count each type only once per day (using Set ensures no duplicates)
+                let holidayCount = 0;
+                
+                if (holidayTypes.has('pto')) {
+                    monthlyDetails[month].pto++;
+                    holidayCount++;
+                    holidayRecords.push({
+                        date: dateStr,
+                        dayOfWeek: getDayOfWeek(dateStr),
+                        type: 'pto',
+                        filePath: page.file.path
+                    });
+                }
+                if (holidayTypes.has('public')) {
+                    monthlyDetails[month].public++;
+                    holidayCount++;
+                    holidayRecords.push({
+                        date: dateStr,
+                        dayOfWeek: getDayOfWeek(dateStr),
+                        type: 'public',
+                        filePath: page.file.path
+                    });
+                }
+                if (holidayTypes.has('sick')) {
+                    monthlyDetails[month].sick++;
+                    holidayRecords.push({
+                        date: dateStr,
+                        dayOfWeek: getDayOfWeek(dateStr),
+                        type: 'sick',
+                        filePath: page.file.path
+                    });
+                }
+                
+                // Total holidays (PTO + public, not sick)
+                monthlyData[month] += holidayCount;
+                monthlyDetails[month].total += holidayCount;
+            } catch (e) {
+                // Skip problematic pages silently
+                continue;
+            }
+        }
+
+        saveToCache(year, monthlyData, monthlyDetails, holidayRecords);
+        } // end of else (not cached)
+
+        // Sort holiday records by date
+        holidayRecords.sort((a, b) => a.date.localeCompare(b.date));
+
+        // Calculate cumulative data with type information
+        let cumulative = 0;
+        const chartData = months.map(month => {
+            cumulative += (monthlyData[month] || 0);
+            const details = monthlyDetails[month] || { total: 0, pto: 0, public: 0, sick: 0 };
+            
+            // Determine dominant type for coloring
+            let dominantType = 'none';
+            if (details.pto > details.public) {
+                dominantType = 'pto';
+            } else if (details.public > details.pto) {
+                dominantType = 'public';
+            } else if (details.pto > 0 && details.public > 0) {
+                dominantType = 'mixed';
+            } else if (details.pto > 0) {
+                dominantType = 'pto';
+            } else if (details.public > 0) {
+                dominantType = 'public';
+            }
+            
+            return {
+                month: month.substring(5), // Just MM
+                monthFull: month,
+                monthly: monthlyData[month] || 0,
+                cumulative: cumulative,
+                details: details,
+                dominantType: dominantType
+            };
+        });
+
+        // Calculate cumulative sick leave data
+        let sickCumulative = 0;
+        const sickChartData = months.map(month => {
+            const sickDays = (monthlyDetails[month] && monthlyDetails[month].sick) || 0;
+            sickCumulative += sickDays;
+            return {
+                month: month.substring(5), // Just MM
+                monthFull: month,
+                monthly: sickDays,
+                cumulative: sickCumulative
+            };
+        });
+
+        // Calculate totals safely
+        const totalDays = chartData.length > 0 ? (chartData[chartData.length - 1].cumulative || 0) : 0;
+        const totalSickDays = sickChartData.length > 0 ? (sickChartData[sickChartData.length - 1].cumulative || 0) : 0;
+
+        const maxCumulative = Math.max(
+            ...chartData.map(d => d.cumulative || 0), 
+            annualLeaveLimit || 1, 
+            5
+        );
+        const maxSickCumulative = Math.max(
+            ...sickChartData.map(d => d.cumulative || 0), 
+            1
+        );
+
+        // Function to get dot color based on holiday type
+        function getDotColor(type) {
+            switch(type) {
+                case 'pto': return '#3498db';
+                case 'public': return '#f1c40f';
+                case 'mixed': return '#27ae60';
+                default: return 'white';
+            }
+        }
+
+        function getDotStroke(type) {
+            switch(type) {
+                case 'pto': return '#2980b9';
+                case 'public': return '#f39c12';
+                case 'mixed': return '#229954';
+                default: return '#d65d0e';
+            }
+        }
+
+        // Chart dimensions
+        const chartWidth = 500;
+        const chartHeight = 300;
+        const padding = 20;
+        const sickChartWidth = 250;
+        const sickChartHeight = 300;
+
+        // Calculate SVG path coordinates for holiday chart
+        const pathCoords = chartData.map((d, i) => {
+            const x = padding + (i / Math.max(chartData.length - 1, 1)) * (chartWidth - 2 * padding);
+            const y = chartHeight - padding - ((d.cumulative || 0) / maxCumulative) * (chartHeight - 2 * padding);
+            return { x: x || padding, y: isNaN(y) ? (chartHeight - padding) : y, data: d };
+        });
+
+        // Calculate SVG path coordinates for sick leave chart
+        const sickPathCoords = sickChartData.map((d, i) => {
+            const x = padding + (i / Math.max(sickChartData.length - 1, 1)) * (sickChartWidth - 2 * padding);
+            const y = sickChartHeight - padding - ((d.cumulative || 0) / maxSickCumulative) * (sickChartHeight - 2 * padding);
+            return { x: x || padding, y: isNaN(y) ? (sickChartHeight - padding) : y, data: d };
+        });
+
+        // Create SVG path strings with validation
+        const pathString = pathCoords
+            .filter(coord => !isNaN(coord.x) && !isNaN(coord.y))
+            .map((coord, i) => `${i === 0 ? 'M' : 'L'} ${coord.x} ${coord.y}`)
+            .join(' ') || `M ${padding} ${chartHeight - padding}`;
+
+        const sickPathString = sickPathCoords
+            .filter(coord => !isNaN(coord.x) && !isNaN(coord.y))
+            .map((coord, i) => `${i === 0 ? 'M' : 'L'} ${coord.x + chartWidth} ${coord.y}`)
+            .join(' ') || `M ${chartWidth + padding} ${sickChartHeight - padding}`;
+
+        // Build grid lines HTML
+        const gridLines = [0, 1, 2, 3, 4].map(i => {
+            const y = padding + (i / 4) * (chartHeight - 2 * padding);
+            const value = Math.round(maxCumulative * (4 - i) / 4);
+            return `
+                <line x1="${padding}" y1="${y}" x2="${chartWidth - padding}" y2="${y}" stroke="var(--background-modifier-border)" stroke-width="1" opacity="0.5"/>
+                <text x="${padding - 5}" y="${y + 4}" text-anchor="end" fill="var(--text-muted)" font-size="12">${value}</text>
+            `;
+        }).join('');
+
+        const sickGridLines = [0, 1, 2, 3, 4].map(i => {
+            const y = padding + (i / 4) * (sickChartHeight - 2 * padding);
+            const value = Math.round(maxSickCumulative * (4 - i) / 4);
+            const xOffset = chartWidth;
+            return `
+                <line x1="${xOffset + padding}" y1="${y}" x2="${xOffset + sickChartWidth - padding}" y2="${y}" stroke="var(--background-modifier-border)" stroke-width="1" opacity="0.5"/>
+                <text x="${xOffset + padding - 5}" y="${y + 4}" text-anchor="end" fill="var(--text-muted)" font-size="12">${value}</text>
+            `;
+        }).join('');
+
+        // Build data points HTML with validation
+        const dataPoints = pathCoords
+            .filter(coord => !isNaN(coord.x) && !isNaN(coord.y))
+            .map(coord => `
+                <g>
+                    <circle cx="${coord.x}" cy="${coord.y}" r="6" 
+                            fill="${getDotColor(coord.data.dominantType)}" 
+                            stroke="${getDotStroke(coord.data.dominantType)}" 
+                            stroke-width="2"
+                            style="cursor: pointer;">
+                    </circle>
+                    <text x="${coord.x}" y="${coord.y - 10}" text-anchor="middle" 
+                          fill="var(--text-normal)" font-size="9" font-weight="bold">${coord.data.cumulative || 0}</text>
+                </g>
+            `).join('');
+
+        const sickDataPoints = sickPathCoords
+            .filter(coord => !isNaN(coord.x) && !isNaN(coord.y))
+            .map(coord => `
+                <g>
+                    <circle cx="${coord.x + chartWidth}" cy="${coord.y}" r="6" 
+                            fill="#ff6b6b" 
+                            stroke="#e74c3c" 
+                            stroke-width="2"
+                            style="cursor: pointer;">
+                    </circle>
+                    <text x="${coord.x + chartWidth}" y="${coord.y - 10}" text-anchor="middle" 
+                          fill="var(--text-normal)" font-size="9" font-weight="bold">${coord.data.cumulative || 0}</text>
+                </g>
+            `).join('');
+
+        // Build X-axis labels
+        const xAxisLabels = pathCoords
+            .filter(coord => !isNaN(coord.x))
+            .map(coord => `
+                <text x="${coord.x}" y="${chartHeight - padding + 10}" text-anchor="middle" fill="var(--text-muted)" font-size="10">${coord.data.month || ''}</text>
+            `).join('');
+
+        const sickXAxisLabels = sickPathCoords
+            .filter(coord => !isNaN(coord.x))
+            .map(coord => `
+                <text x="${coord.x + chartWidth}" y="${sickChartHeight - padding + 15}" text-anchor="middle" fill="var(--text-muted)" font-size="10">${coord.data.month || ''}</text>
+            `).join('');
+
+        // Annual leave limit line
+        const limitLineY = chartHeight - padding - (annualLeaveLimit / maxCumulative) * (chartHeight - 2 * padding);
+        const limitLine = (annualLeaveLimit > 0 && !isNaN(limitLineY)) ? `
+            <line x1="${padding}" y1="${limitLineY}" 
+                  x2="${chartWidth - padding}" y2="${limitLineY}" 
+                  stroke="#e74c3c" stroke-width="3" stroke-dasharray="8,4" opacity="1"/>
+            <text x="${chartWidth - padding - 5}" y="${limitLineY - 8}" 
+                  text-anchor="end" fill="#e74c3c" font-size="10" font-weight="bold">Limit: ${annualLeaveLimit}</text>
+        ` : '';
+
+        // Summary text
+        const remainingDays = Math.max(0, annualLeaveLimit - totalDays);
+        const quotaText = annualLeaveLimit > 0 
+            ? `<br><strong>Annual Leave Quota:</strong> ${annualLeaveLimit} days | <strong>Remaining:</strong> ${remainingDays} days`
+            : '<br><strong>Annual Leave Quota:</strong> Not Set';
+
+        // Build holiday list HTML in four columns
+        let holidayListHtml;
+        if (holidayRecords.length > 0) {
+            const itemsPerColumn = Math.ceil(holidayRecords.length / 4);
+            const firstColumn = holidayRecords.slice(0, itemsPerColumn);
+            const secondColumn = holidayRecords.slice(itemsPerColumn, itemsPerColumn * 2);
+            const thirdColumn = holidayRecords.slice(itemsPerColumn * 2, itemsPerColumn * 3);
+            const fourthColumn = holidayRecords.slice(itemsPerColumn * 3);
+
+            const firstColumnHtml = firstColumn.map((record, index) => {
+                const typeInfo = getTypeInfo(record.type);
+                return `
+                    <div style="display: flex; align-items: center; padding: 4px 8px; border-radius: 4px; background: ${typeInfo.bg}; margin: 2px 0;">
+                        <span style="width: 25px; color: var(--text-muted); font-size: 11px;">${index + 1}.</span>
+                        <a class="internal-link" data-href="${record.date}" href="${record.date}" style="color: var(--text-normal); text-decoration: none; font-family: monospace; font-size: 12px;">${record.date}</a>
+                        <span style="margin: 0 8px; color: var(--text-muted); font-size: 12px;">周${record.dayOfWeek}</span>
+                        <span style="padding: 2px 8px; border-radius: 3px; background: ${typeInfo.color}; color: white; font-size: 11px; font-weight: 500;">${typeInfo.name}</span>
+                    </div>
+                `;
+            }).join('');
+
+            const secondColumnHtml = secondColumn.map((record, index) => {
+                const typeInfo = getTypeInfo(record.type);
+                const displayIndex = itemsPerColumn + index + 1;
+                return `
+                    <div style="display: flex; align-items: center; padding: 4px 8px; border-radius: 4px; background: ${typeInfo.bg}; margin: 2px 0;">
+                        <span style="width: 25px; color: var(--text-muted); font-size: 11px;">${displayIndex}.</span>
+                        <a class="internal-link" data-href="${record.date}" href="${record.date}" style="color: var(--text-normal); text-decoration: none; font-family: monospace; font-size: 12px;">${record.date}</a>
+                        <span style="margin: 0 8px; color: var(--text-muted); font-size: 12px;">周${record.dayOfWeek}</span>
+                        <span style="padding: 2px 8px; border-radius: 3px; background: ${typeInfo.color}; color: white; font-size: 11px; font-weight: 500;">${typeInfo.name}</span>
+                    </div>
+                `;
+            }).join('');
+
+            const thirdColumnHtml = thirdColumn.map((record, index) => {
+                const typeInfo = getTypeInfo(record.type);
+                const displayIndex = itemsPerColumn * 2 + index + 1;
+                return `
+                    <div style="display: flex; align-items: center; padding: 4px 8px; border-radius: 4px; background: ${typeInfo.bg}; margin: 2px 0;">
+                        <span style="width: 25px; color: var(--text-muted); font-size: 11px;">${displayIndex}.</span>
+                        <a class="internal-link" data-href="${record.date}" href="${record.date}" style="color: var(--text-normal); text-decoration: none; font-family: monospace; font-size: 12px;">${record.date}</a>
+                        <span style="margin: 0 8px; color: var(--text-muted); font-size: 12px;">周${record.dayOfWeek}</span>
+                        <span style="padding: 2px 8px; border-radius: 3px; background: ${typeInfo.color}; color: white; font-size: 11px; font-weight: 500;">${typeInfo.name}</span>
+                    </div>
+                `;
+            }).join('');
+
+            const fourthColumnHtml = fourthColumn.map((record, index) => {
+                const typeInfo = getTypeInfo(record.type);
+                const displayIndex = itemsPerColumn * 3 + index + 1;
+                return `
+                    <div style="display: flex; align-items: center; padding: 4px 8px; border-radius: 4px; background: ${typeInfo.bg}; margin: 2px 0;">
+                        <span style="width: 25px; color: var(--text-muted); font-size: 11px;">${displayIndex}.</span>
+                        <a class="internal-link" data-href="${record.date}" href="${record.date}" style="color: var(--text-normal); text-decoration: none; font-family: monospace; font-size: 12px;">${record.date}</a>
+                        <span style="margin: 0 8px; color: var(--text-muted); font-size: 12px;">周${record.dayOfWeek}</span>
+                        <span style="padding: 2px 8px; border-radius: 3px; background: ${typeInfo.color}; color: white; font-size: 11px; font-weight: 500;">${typeInfo.name}</span>
+                    </div>
+                `;
+            }).join('');
+
+            holidayListHtml = `
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">${firstColumnHtml}</div>
+                    <div style="flex: 1;">${secondColumnHtml}</div>
+                    <div style="flex: 1;">${thirdColumnHtml}</div>
+                    <div style="flex: 1;">${fourthColumnHtml}</div>
+                </div>
+            `;
+        } else {
+            holidayListHtml = '<div style="color: var(--text-muted); text-align: center; padding: 10px;">暂无休假记录</div>';
+        }
+
+        // Cache status and refresh button
+        const cacheBar = dv.container.createEl('div', {
+            attr: { style: 'display:flex; align-items:center; gap:12px; margin-bottom:8px; font-size:0.85em; color:var(--text-muted);' }
+        });
+        if (cachedAt) {
+            const ageMinutes = Math.round((Date.now() - cachedAt.getTime()) / 60000);
+            const ageText = ageMinutes < 60 ? `${ageMinutes}分钟前` : `${Math.round(ageMinutes / 60)}小时前`;
+            cacheBar.createEl('span', { text: `📦 缓存于${ageText}` });
+        }
+        const refreshBtn = cacheBar.createEl('button', { text: '↺ 刷新数据' });
+        refreshBtn.style.cssText = 'padding:2px 10px; border-radius:4px; cursor:pointer; border:1px solid var(--background-modifier-border); background:var(--background-secondary); color:var(--text-normal); font-size:0.85em;';
+        refreshBtn.addEventListener('click', async () => {
+            clearCache();
+            const file = app.workspace.getActiveFile();
+            await app.workspace.activeLeaf.openFile(file, { active: true });
+        });
+
+        // Create chart HTML
+        const container = dv.container.createEl('div');
+        container.innerHTML = `
+        <div style="width: 100%; border: 1px solid var(--background-modifier-border); border-radius: 8px; padding: 20px; margin: 20px 0;">
+            <h3 style="text-align: center; margin: 0 0 20px 0; color: var(--text-normal);">${year} 休假统计</h3>
+            
+            <div style="width: 100%; display: flex;">
+                <svg width="100%" height="${chartHeight + 30}" style="border-radius: 4px;" viewBox="0 0 ${chartWidth + sickChartWidth} ${chartHeight + 30}">
+                    <!-- Holiday Chart Grid -->
+                    ${gridLines}
+                    
+                    <!-- Holiday Chart Axes -->
+                    <line x1="${padding}" y1="${padding}" x2="${padding}" y2="${chartHeight - padding}" stroke="var(--text-muted)" stroke-width="2"/>
+                    <line x1="${padding}" y1="${chartHeight - padding}" x2="${chartWidth - padding}" y2="${chartHeight - padding}" stroke="var(--text-muted)" stroke-width="2"/>
+                    
+                    <!-- Holiday Main line -->
+                    <path d="${pathString}" stroke="#d65d0e" stroke-width="3" fill="none"/>
+                    
+                    <!-- Annual leave limit line -->
+                    ${limitLine}
+                    
+                    <!-- Holiday Data points -->
+                    ${dataPoints}
+                    
+                    <!-- Holiday X-axis labels -->
+                    ${xAxisLabels}
+                    
+                    <!-- Holiday Y-axis title -->
+                    <text x="15" y="${chartHeight / 2}" text-anchor="middle" fill="var(--text-muted)" font-size="11" transform="rotate(-90, 15, ${chartHeight / 2})">Days</text>
+                    
+                    <!-- Sick Leave Chart Grid -->
+                    ${sickGridLines}
+                    
+                    <!-- Sick Chart Axes -->
+                    <line x1="${chartWidth + padding}" y1="${padding}" x2="${chartWidth + padding}" y2="${sickChartHeight - padding}" stroke="var(--text-muted)" stroke-width="2"/>
+                    <line x1="${chartWidth + padding}" y1="${sickChartHeight - padding}" x2="${chartWidth + sickChartWidth - padding}" y2="${sickChartHeight - padding}" stroke="var(--text-muted)" stroke-width="2"/>
+                    
+                    <!-- Sick leave line -->
+                    <path d="${sickPathString}" stroke="#e74c3c" stroke-width="3" fill="none"/>
+                    
+                    <!-- Sick Data points -->
+                    ${sickDataPoints}
+                    
+                    <!-- Sick X-axis labels -->
+                    ${sickXAxisLabels}
+                    
+                    <!-- Sick Y-axis title -->
+                    <text x="${chartWidth + 10}" y="${sickChartHeight / 2}" text-anchor="middle" fill="var(--text-muted)" font-size="11" transform="rotate(-90, ${chartWidth + 10}, ${sickChartHeight / 2})">Days</text>
+                </svg>
+            </div>
+            
+            <!-- Legend -->
+            <div style="display: flex; justify-content: center; gap: 10px; margin: 5px 0; padding: 5px; border-radius: 6px; font-size: 11px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #3498db; border: 2px solid #2980b9;"></div>
+                    <span style="color: var(--text-normal);">PTO</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #f1c40f; border: 2px solid #f39c12;"></div>
+                    <span style="color: var(--text-normal);">Public Holiday</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #27ae60; border: 2px solid #229954;"></div>
+                    <span style="color: var(--text-normal);">Mixed</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: white; border: 2px solid #d65d0e;"></div>
+                    <span style="color: var(--text-normal);">No Holiday</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #ff6b6b; border: 2px solid #e74c3c;"></div>
+                    <span style="color: var(--text-normal);">Sick Leave</span>
+                </div>
+            </div>
+            
+            <!-- Summary Stats -->
+            <div style="text-align: center; margin-top: 5px; padding: 5px; border-radius: 6px; color: var(--text-normal);">
+                <strong>Holiday Total:</strong> ${totalDays} days | 
+                <strong>Sick Leave Total:</strong> ${totalSickDays} days |
+                <strong>Average Holiday/Month:</strong> ${(totalDays / 12).toFixed(1)} days
+                ${quotaText}
+            </div>
+            
+            <!-- Holiday List -->
+            <details style="margin-top: 15px; border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 10px;">
+                <summary style="cursor: pointer; font-weight: 600; color: var(--text-normal); padding: 5px;">
+                    📅 休假明细 (${holidayRecords.length} 条记录)
+                </summary>
+                <div style="margin-top: 10px; max-height: 300px; overflow-y: auto;">
+                    ${holidayListHtml}
+                </div>
+            </details>
+        </div>
+        `;
+    } catch (e) {
+        // Ultimate fallback - display error gracefully
+        try {
+            dv.paragraph(`⚠️ Error rendering holiday chart: ${e.message || 'Unknown error'}`);
+        } catch (e2) {
+            console.error("Holiday chart error:", e);
+        }
+    } finally {
+        // Always clear running flag
+        window[containerId + '_running'] = false;
+    }
+})();
+```

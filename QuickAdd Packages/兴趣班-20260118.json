@@ -1,0 +1,517 @@
+{
+  "schemaVersion": 1,
+  "quickAddVersion": "2.8.0",
+  "createdAt": "2026-01-19T04:12:45.281Z",
+  "rootChoiceIds": [
+    "24d4f1b8-6c87-46d6-bf6a-142371eb62b1",
+    "78990529-feb1-4f28-8e25-be31cac8a177",
+    "0dc8e12b-e0cd-4b8c-9c20-109c78fe4997",
+    "e93ecd4c-1350-496d-806a-e9e2cbce4056",
+    "18fe5a7d-0c20-4917-891e-6d2d0b30fee9",
+    "bc202653-4b98-45b6-94d6-3ff0208e656e",
+    "3d76c237-7795-438b-b539-7220b64d7e0a"
+  ],
+  "choices": [
+    {
+      "choice": {
+        "id": "24d4f1b8-6c87-46d6-bf6a-142371eb62b1",
+        "name": "Organize Bases File",
+        "type": "Macro",
+        "command": false,
+        "runOnStartup": true,
+        "macro": {
+          "name": "Organize Bases File",
+          "id": "a7f85c1b-e278-4510-bb54-9573ec262026",
+          "commands": [
+            {
+              "name": "basesOrganizer",
+              "type": "UserScript",
+              "id": "abc93f1f-d962-47a9-b791-58e712f4b163",
+              "path": "Helper/utils/basesOrganizer.js",
+              "settings": {}
+            }
+          ]
+        }
+      },
+      "pathHint": [
+        "Organize Bases File"
+      ],
+      "parentChoiceId": null
+    },
+    {
+      "choice": {
+        "id": "78990529-feb1-4f28-8e25-be31cac8a177",
+        "name": "新在看",
+        "type": "Multi",
+        "command": true,
+        "choices": [
+          {
+            "id": "bfeddf5b-d75d-4437-a7b3-85255859e87c",
+            "name": "新综艺",
+            "type": "Template",
+            "command": false,
+            "templatePath": "Helper/Templates/综艺",
+            "fileNameFormat": {
+              "enabled": false,
+              "format": ""
+            },
+            "folder": {
+              "enabled": true,
+              "folders": [
+                "看电视"
+              ],
+              "chooseWhenCreatingNote": false,
+              "createInSameFolderAsActiveFile": false,
+              "chooseFromSubfolders": false
+            },
+            "appendLink": false,
+            "openFile": true,
+            "fileOpening": {
+              "location": "split",
+              "direction": "vertical",
+              "mode": "source",
+              "focus": true
+            },
+            "fileExistsMode": "Increment the file name",
+            "setFileExistsBehavior": false
+          },
+          {
+            "id": "81378d2b-ff51-412e-879b-bd3796ddd6a5",
+            "name": "新电视剧",
+            "type": "Template",
+            "command": false,
+            "templatePath": "Helper/Templates/电视剧",
+            "fileNameFormat": {
+              "enabled": false,
+              "format": ""
+            },
+            "folder": {
+              "enabled": true,
+              "folders": [
+                "看电视"
+              ],
+              "chooseWhenCreatingNote": false,
+              "createInSameFolderAsActiveFile": false,
+              "chooseFromSubfolders": false
+            },
+            "appendLink": false,
+            "openFile": true,
+            "fileOpening": {
+              "location": "split",
+              "direction": "vertical",
+              "mode": "source",
+              "focus": true
+            },
+            "fileExistsMode": "Increment the file name",
+            "setFileExistsBehavior": false
+          },
+          {
+            "id": "3f28750b-141f-491d-8256-788026129c0e",
+            "name": "新电影",
+            "type": "Template",
+            "command": false,
+            "templatePath": "Helper/Templates/电影",
+            "fileNameFormat": {
+              "enabled": false,
+              "format": ""
+            },
+            "folder": {
+              "enabled": true,
+              "folders": [
+                "看电视"
+              ],
+              "chooseWhenCreatingNote": false,
+              "createInSameFolderAsActiveFile": false,
+              "chooseFromSubfolders": false
+            },
+            "appendLink": false,
+            "openFile": true,
+            "fileOpening": {
+              "location": "split",
+              "direction": "vertical",
+              "mode": "source",
+              "focus": true
+            },
+            "fileExistsMode": "Increment the file name",
+            "setFileExistsBehavior": false
+          },
+          {
+            "id": "963a3ed6-28e6-4257-965a-d15b8cce0a05",
+            "name": "新剧场",
+            "type": "Template",
+            "command": false,
+            "templatePath": "Helper/Templates/Musical",
+            "fileNameFormat": {
+              "enabled": false,
+              "format": ""
+            },
+            "folder": {
+              "enabled": true,
+              "folders": [
+                "Hobbies/Musical"
+              ],
+              "chooseWhenCreatingNote": false,
+              "createInSameFolderAsActiveFile": false,
+              "chooseFromSubfolders": false
+            },
+            "appendLink": false,
+            "openFile": true,
+            "fileOpening": {
+              "location": "tab",
+              "direction": "vertical",
+              "mode": "default",
+              "focus": true
+            },
+            "fileExistsMode": "Increment the file name",
+            "setFileExistsBehavior": true
+          }
+        ],
+        "collapsed": false
+      },
+      "pathHint": [
+        "新在看"
+      ],
+      "parentChoiceId": null
+    },
+    {
+      "choice": {
+        "id": "0dc8e12b-e0cd-4b8c-9c20-109c78fe4997",
+        "name": "todayNote",
+        "type": "Template",
+        "command": true,
+        "templatePath": "Helper/Templates/Daily Note.md",
+        "fileNameFormat": {
+          "enabled": true,
+          "format": "{{DATE:YYYY-MM-DD}}"
+        },
+        "folder": {
+          "enabled": true,
+          "folders": [
+            "日记/2026"
+          ],
+          "chooseWhenCreatingNote": false,
+          "createInSameFolderAsActiveFile": false,
+          "chooseFromSubfolders": false
+        },
+        "appendLink": false,
+        "openFile": true,
+        "fileOpening": {
+          "location": "tab",
+          "direction": "vertical",
+          "mode": "source",
+          "focus": true
+        },
+        "fileExistsMode": "Increment the file name",
+        "setFileExistsBehavior": false
+      },
+      "pathHint": [
+        "todayNote"
+      ],
+      "parentChoiceId": null
+    },
+    {
+      "choice": {
+        "id": "e93ecd4c-1350-496d-806a-e9e2cbce4056",
+        "name": "Organize Attachments",
+        "type": "Macro",
+        "command": true,
+        "runOnStartup": true,
+        "macro": {
+          "name": "Organize Attachments",
+          "id": "def65063-0917-43e0-9e55-e94bcf405bab",
+          "commands": [
+            {
+              "name": "attachmentOrganizer",
+              "type": "UserScript",
+              "id": "6ebeb3f9-339b-4d27-b432-71cf7f8b9f6e",
+              "path": "Helper/utils/attachmentOrganizer.js",
+              "settings": {}
+            }
+          ]
+        }
+      },
+      "pathHint": [
+        "Organize Attachments"
+      ],
+      "parentChoiceId": null
+    },
+    {
+      "choice": {
+        "id": "18fe5a7d-0c20-4917-891e-6d2d0b30fee9",
+        "name": "电视更新",
+        "type": "Macro",
+        "command": true,
+        "runOnStartup": false,
+        "macro": {
+          "name": "电视更新",
+          "id": "6aaefc08-cec7-49a7-9fff-41a532674534",
+          "commands": [
+            {
+              "name": "dailyAddShow",
+              "type": "UserScript",
+              "id": "8c2ada0b-c194-41ac-bf1b-71743aae90d1",
+              "path": "Helper/utils/dailyAddShow.js",
+              "settings": {}
+            }
+          ]
+        }
+      },
+      "pathHint": [
+        "电视更新"
+      ],
+      "parentChoiceId": null
+    },
+    {
+      "choice": {
+        "id": "bc202653-4b98-45b6-94d6-3ff0208e656e",
+        "name": "读书更新",
+        "type": "Macro",
+        "command": true,
+        "runOnStartup": false,
+        "macro": {
+          "name": "读书更新",
+          "id": "1c14985e-c755-45d3-ac75-86f4ee687ca9",
+          "commands": [
+            {
+              "name": "dailyAddBook",
+              "type": "UserScript",
+              "id": "59302a87-b478-4d8b-aeb2-36fa8d568e28",
+              "path": "Helper/utils/dailyAddBook.js",
+              "settings": {}
+            }
+          ]
+        }
+      },
+      "pathHint": [
+        "读书更新"
+      ],
+      "parentChoiceId": null
+    },
+    {
+      "choice": {
+        "id": "3d76c237-7795-438b-b539-7220b64d7e0a",
+        "name": "monthlyBulletPlan",
+        "type": "Capture",
+        "command": true,
+        "appendLink": false,
+        "captureTo": "",
+        "captureToActiveFile": true,
+        "activeFileWritePosition": "cursor",
+        "createFileIfItDoesntExist": {
+          "enabled": false,
+          "createWithTemplate": false,
+          "template": ""
+        },
+        "format": {
+          "enabled": true,
+          "format": "```js quickadd\nconst now = new Date();\nconst currentYear = now.getFullYear();\nconst years = [];\nfor (let y = currentYear; y <= currentYear + 10; y++) years.push(y.toString());\n\nconst selectedYear = await this.quickAddApi.suggester(years, years.map(y => parseInt(y)));\nif (!selectedYear) return \"\";\n\nconst monthNames = [\"1月\", \"2月\", \"3月\", \"4月\", \"5月\", \"6月\", \"7月\", \"8月\", \"9月\", \"10月\", \"11月\", \"12月\"];\nconst selectedMonth = await this.quickAddApi.suggester(monthNames, [1,2,3,4,5,6,7,8,9,10,11,12]);\nif (!selectedMonth) return \"\";\n\nconst dayNames = [\"日\", \"一\", \"二\", \"三\", \"四\", \"五\", \"六\"];\nconst daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();\nconst midPoint = Math.ceil(daysInMonth / 2);\n\nfunction getDayOfWeek(year, month, day) {\n    return dayNames[new Date(year, month - 1, day).getDay()];\n}\n\nlet table = `# ${selectedYear}年${selectedMonth}月 事件Planning^\\n\\n`;\ntable += `| 日期 | 星期 | 事件 | 日期 | 星期 | 事件 |\\n`;\ntable += `| :--: | :--: | ---- | :--: | :--: | ---- |\\n`;\n\nfor (let i = 1; i <= midPoint; i++) {\n    const leftDay = i;\n    const rightDay = i + midPoint;\n    const leftDayOfWeek = getDayOfWeek(selectedYear, selectedMonth, leftDay);\n    \n    let row = `| ${leftDay} | ${leftDayOfWeek} |  |`;\n    \n    if (rightDay <= daysInMonth) {\n        const rightDayOfWeek = getDayOfWeek(selectedYear, selectedMonth, rightDay);\n        row += ` ${rightDay} | ${rightDayOfWeek} |  |`;\n    } else {\n        row += ` --- | --- |  |`;\n    }\n    table += row + \"\\n\";\n}\nreturn table;\n```"
+        },
+        "insertAfter": {
+          "enabled": false,
+          "after": "",
+          "insertAtEnd": false,
+          "considerSubsections": false,
+          "createIfNotFound": false,
+          "createIfNotFoundLocation": "top"
+        },
+        "newLineCapture": {
+          "enabled": false,
+          "direction": "below"
+        },
+        "prepend": false,
+        "task": false,
+        "openFile": false,
+        "fileOpening": {
+          "location": "tab",
+          "direction": "vertical",
+          "mode": "default",
+          "focus": true
+        }
+      },
+      "pathHint": [
+        "monthlyBulletPlan"
+      ],
+      "parentChoiceId": null
+    },
+    {
+      "choice": {
+        "id": "bfeddf5b-d75d-4437-a7b3-85255859e87c",
+        "name": "新综艺",
+        "type": "Template",
+        "command": false,
+        "templatePath": "Helper/Templates/综艺",
+        "fileNameFormat": {
+          "enabled": false,
+          "format": ""
+        },
+        "folder": {
+          "enabled": true,
+          "folders": [
+            "看电视"
+          ],
+          "chooseWhenCreatingNote": false,
+          "createInSameFolderAsActiveFile": false,
+          "chooseFromSubfolders": false
+        },
+        "appendLink": false,
+        "openFile": true,
+        "fileOpening": {
+          "location": "split",
+          "direction": "vertical",
+          "mode": "source",
+          "focus": true
+        },
+        "fileExistsMode": "Increment the file name",
+        "setFileExistsBehavior": false
+      },
+      "pathHint": [
+        "新在看",
+        "新综艺"
+      ],
+      "parentChoiceId": "78990529-feb1-4f28-8e25-be31cac8a177"
+    },
+    {
+      "choice": {
+        "id": "81378d2b-ff51-412e-879b-bd3796ddd6a5",
+        "name": "新电视剧",
+        "type": "Template",
+        "command": false,
+        "templatePath": "Helper/Templates/电视剧",
+        "fileNameFormat": {
+          "enabled": false,
+          "format": ""
+        },
+        "folder": {
+          "enabled": true,
+          "folders": [
+            "看电视"
+          ],
+          "chooseWhenCreatingNote": false,
+          "createInSameFolderAsActiveFile": false,
+          "chooseFromSubfolders": false
+        },
+        "appendLink": false,
+        "openFile": true,
+        "fileOpening": {
+          "location": "split",
+          "direction": "vertical",
+          "mode": "source",
+          "focus": true
+        },
+        "fileExistsMode": "Increment the file name",
+        "setFileExistsBehavior": false
+      },
+      "pathHint": [
+        "新在看",
+        "新电视剧"
+      ],
+      "parentChoiceId": "78990529-feb1-4f28-8e25-be31cac8a177"
+    },
+    {
+      "choice": {
+        "id": "3f28750b-141f-491d-8256-788026129c0e",
+        "name": "新电影",
+        "type": "Template",
+        "command": false,
+        "templatePath": "Helper/Templates/电影",
+        "fileNameFormat": {
+          "enabled": false,
+          "format": ""
+        },
+        "folder": {
+          "enabled": true,
+          "folders": [
+            "看电视"
+          ],
+          "chooseWhenCreatingNote": false,
+          "createInSameFolderAsActiveFile": false,
+          "chooseFromSubfolders": false
+        },
+        "appendLink": false,
+        "openFile": true,
+        "fileOpening": {
+          "location": "split",
+          "direction": "vertical",
+          "mode": "source",
+          "focus": true
+        },
+        "fileExistsMode": "Increment the file name",
+        "setFileExistsBehavior": false
+      },
+      "pathHint": [
+        "新在看",
+        "新电影"
+      ],
+      "parentChoiceId": "78990529-feb1-4f28-8e25-be31cac8a177"
+    },
+    {
+      "choice": {
+        "id": "963a3ed6-28e6-4257-965a-d15b8cce0a05",
+        "name": "新剧场",
+        "type": "Template",
+        "command": false,
+        "templatePath": "Helper/Templates/Musical",
+        "fileNameFormat": {
+          "enabled": false,
+          "format": ""
+        },
+        "folder": {
+          "enabled": true,
+          "folders": [
+            "Hobbies/Musical"
+          ],
+          "chooseWhenCreatingNote": false,
+          "createInSameFolderAsActiveFile": false,
+          "chooseFromSubfolders": false
+        },
+        "appendLink": false,
+        "openFile": true,
+        "fileOpening": {
+          "location": "tab",
+          "direction": "vertical",
+          "mode": "default",
+          "focus": true
+        },
+        "fileExistsMode": "Increment the file name",
+        "setFileExistsBehavior": true
+      },
+      "pathHint": [
+        "新在看",
+        "新剧场"
+      ],
+      "parentChoiceId": "78990529-feb1-4f28-8e25-be31cac8a177"
+    }
+  ],
+  "assets": [
+    {
+      "kind": "user-script",
+      "originalPath": "Helper/utils/basesOrganizer.js",
+      "contentEncoding": "base64",
+      "content": "bW9kdWxlLmV4cG9ydHMgPSBhc3luYyAocGFyYW1zKSA9PiB7CiAgICBjb25zdCB7IGFwcCB9ID0gcGFyYW1zOwogICAgY29uc3QgdGFyZ2V0Rm9sZGVyID0gIkJhc2VzIjsgLy8gQ2hhbmdlIHRoaXMgdG8geW91ciBkZXNpcmVkIGZvbGRlciBuYW1lCiAgICAKICAgIC8vIEdldCBhbGwgZmlsZXMgd2l0aCAuYmFzZXMgZXh0ZW5zaW9uCiAgICBjb25zdCBiYXNlc0ZpbGVzID0gYXBwLnZhdWx0LmdldEFsbExvYWRlZEZpbGVzKCkKICAgICAgICAuZmlsdGVyKGZpbGUgPT4gZmlsZS5leHRlbnNpb24gPT09ICdiYXNlJyk7CiAgICAKICAgIC8vIENyZWF0ZSB0YXJnZXQgZm9sZGVyIGlmIGl0IGRvZXNuJ3QgZXhpc3QKICAgIGlmICghYXBwLnZhdWx0LmdldEFic3RyYWN0RmlsZUJ5UGF0aCh0YXJnZXRGb2xkZXIpKSB7CiAgICAgICAgYXdhaXQgYXBwLnZhdWx0LmNyZWF0ZUZvbGRlcih0YXJnZXRGb2xkZXIpOwogICAgfQogICAgCiAgICAvLyBNb3ZlIGVhY2ggLmJhc2VzIGZpbGUgdG8gdGhlIHRhcmdldCBmb2xkZXIKICAgIGxldCBtb3ZlZENvdW50ID0gMDsKICAgIGZvciAoY29uc3QgZmlsZSBvZiBiYXNlc0ZpbGVzKSB7CiAgICAgICAgaWYgKCFmaWxlLnBhdGguc3RhcnRzV2l0aCh0YXJnZXRGb2xkZXIgKyAnLycpKSB7CiAgICAgICAgICAgIGNvbnN0IG5ld1BhdGggPSBgJHt0YXJnZXRGb2xkZXJ9LyR7ZmlsZS5uYW1lfWA7CiAgICAgICAgICAgIGF3YWl0IGFwcC5maWxlTWFuYWdlci5yZW5hbWVGaWxlKGZpbGUsIG5ld1BhdGgpOwogICAgICAgICAgICBtb3ZlZENvdW50Kys7CiAgICAgICAgfQogICAgfQogICAgCiAgICAvLyBTaG93IG5vdGlmaWNhdGlvbgogICAgbmV3IE5vdGljZShgTW92ZWQgJHttb3ZlZENvdW50fSAuYmFzZSBmaWxlcyB0byAke3RhcmdldEZvbGRlcn0gZm9sZGVyYCk7Cn07"
+    },
+    {
+      "kind": "user-script",
+      "originalPath": "Helper/utils/attachmentOrganizer.js",
+      "contentEncoding": "base64",
+      "content": "bW9kdWxlLmV4cG9ydHMgPSBhc3luYyAocGFyYW1zKSA9PiB7CiAgICBjb25zdCB7IGFwcCB9ID0gcGFyYW1zOwogICAgCiAgICAvLyBEZWZpbmUgdGFyZ2V0IGZvbGRlcnMgYW5kIGZpbGUgZXh0ZW5zaW9ucwogICAgY29uc3QgaW1hZ2VGb2xkZXIgPSAiQXR0YWNobWVudHMiOwogICAgY29uc3QgcGRmRm9sZGVyID0gIkF0dGFjaG1lbnRzL3BkZiI7CiAgICBjb25zdCBpbWFnZUV4dGVuc2lvbnMgPSBbJ2pwZycsICdqcGVnJywgJ3BuZycsICdnaWYnLCAnYm1wJywgJ3N2ZycsICd3ZWJwJywgJ21vdiddOwogICAgY29uc3QgcGRmRXh0ZW5zaW9uID0gJ3BkZic7CiAgICAKICAgIC8vIEdldCBhbGwgZmlsZXMKICAgIGNvbnN0IGFsbEZpbGVzID0gYXBwLnZhdWx0LmdldEFsbExvYWRlZEZpbGVzKCkKICAgICAgICAuZmlsdGVyKGZpbGUgPT4gZmlsZS5leHRlbnNpb24pOyAvLyBPbmx5IGZpbGVzIHdpdGggZXh0ZW5zaW9ucwogICAgCiAgICAvLyBTZXBhcmF0ZSBpbWFnZSBhbmQgUERGIGZpbGVzCiAgICBjb25zdCBpbWFnZUZpbGVzID0gYWxsRmlsZXMuZmlsdGVyKGZpbGUgPT4gCiAgICAgICAgaW1hZ2VFeHRlbnNpb25zLmluY2x1ZGVzKGZpbGUuZXh0ZW5zaW9uLnRvTG93ZXJDYXNlKCkpCiAgICApOwogICAgY29uc3QgcGRmRmlsZXMgPSBhbGxGaWxlcy5maWx0ZXIoZmlsZSA9PiAKICAgICAgICBmaWxlLmV4dGVuc2lvbi50b0xvd2VyQ2FzZSgpID09PSBwZGZFeHRlbnNpb24KICAgICk7CiAgICAKICAgIC8vIENyZWF0ZSB0YXJnZXQgZm9sZGVycyBpZiB0aGV5IGRvbid0IGV4aXN0CiAgICBpZiAoIWFwcC52YXVsdC5nZXRBYnN0cmFjdEZpbGVCeVBhdGgoaW1hZ2VGb2xkZXIpKSB7CiAgICAgICAgYXdhaXQgYXBwLnZhdWx0LmNyZWF0ZUZvbGRlcihpbWFnZUZvbGRlcik7CiAgICB9CiAgICBpZiAoIWFwcC52YXVsdC5nZXRBYnN0cmFjdEZpbGVCeVBhdGgocGRmRm9sZGVyKSkgewogICAgICAgIGF3YWl0IGFwcC52YXVsdC5jcmVhdGVGb2xkZXIocGRmRm9sZGVyKTsKICAgIH0KICAgIAogICAgLy8gTW92ZSBpbWFnZSBmaWxlcwogICAgbGV0IG1vdmVkSW1hZ2VDb3VudCA9IDA7CiAgICBmb3IgKGNvbnN0IGZpbGUgb2YgaW1hZ2VGaWxlcykgewogICAgICAgIGlmICghZmlsZS5wYXRoLnN0YXJ0c1dpdGgoaW1hZ2VGb2xkZXIgKyAnLycpKSB7CiAgICAgICAgICAgIGNvbnN0IG5ld1BhdGggPSBgJHtpbWFnZUZvbGRlcn0vJHtmaWxlLm5hbWV9YDsKICAgICAgICAgICAgdHJ5IHsKICAgICAgICAgICAgICAgIGF3YWl0IGFwcC5maWxlTWFuYWdlci5yZW5hbWVGaWxlKGZpbGUsIG5ld1BhdGgpOwogICAgICAgICAgICAgICAgbW92ZWRJbWFnZUNvdW50Kys7CiAgICAgICAgICAgIH0gY2F0Y2ggKGVycm9yKSB7CiAgICAgICAgICAgICAgICBjb25zb2xlLmVycm9yKGBGYWlsZWQgdG8gbW92ZSAke2ZpbGUubmFtZX06YCwgZXJyb3IpOwogICAgICAgICAgICB9CiAgICAgICAgfQogICAgfQogICAgCiAgICAvLyBNb3ZlIFBERiBmaWxlcwogICAgbGV0IG1vdmVkUGRmQ291bnQgPSAwOwogICAgZm9yIChjb25zdCBmaWxlIG9mIHBkZkZpbGVzKSB7CiAgICAgICAgaWYgKCFmaWxlLnBhdGguc3RhcnRzV2l0aChwZGZGb2xkZXIgKyAnLycpKSB7CiAgICAgICAgICAgIGNvbnN0IG5ld1BhdGggPSBgJHtwZGZGb2xkZXJ9LyR7ZmlsZS5uYW1lfWA7CiAgICAgICAgICAgIHRyeSB7CiAgICAgICAgICAgICAgICBhd2FpdCBhcHAuZmlsZU1hbmFnZXIucmVuYW1lRmlsZShmaWxlLCBuZXdQYXRoKTsKICAgICAgICAgICAgICAgIG1vdmVkUGRmQ291bnQrKzsKICAgICAgICAgICAgfSBjYXRjaCAoZXJyb3IpIHsKICAgICAgICAgICAgICAgIGNvbnNvbGUuZXJyb3IoYEZhaWxlZCB0byBtb3ZlICR7ZmlsZS5uYW1lfTpgLCBlcnJvcik7CiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICB9CiAgICAKICAgIC8vIFNob3cgbm90aWZpY2F0aW9uCiAgICBuZXcgTm90aWNlKGBNb3ZlZCAke21vdmVkSW1hZ2VDb3VudH0gaW1hZ2UgZmlsZXMgYW5kICR7bW92ZWRQZGZDb3VudH0gUERGIGZpbGVzYCk7Cn07"
+    },
+    {
+      "kind": "user-script",
+      "originalPath": "Helper/utils/dailyAddShow.js",
+      "contentEncoding": "base64",
+      "content": "bW9kdWxlLmV4cG9ydHMgPSBhc3luYyAocGFyYW1zKSA9PiB7CiAgICBjb25zdCB7IGFwcCwgcXVpY2tBZGRBcGkgfSA9IHBhcmFtczsKICAgIAogICAgY29uc3Qgc2hvd3MgPSBhcHAudmF1bHQuZ2V0TWFya2Rvd25GaWxlcygpCiAgICAgICAgLmZpbHRlcihmdW5jdGlvbihmKSB7CiAgICAgICAgICAgIGNvbnN0IGNhY2hlID0gYXBwLm1ldGFkYXRhQ2FjaGUuZ2V0RmlsZUNhY2hlKGYpOwogICAgICAgICAgICBjb25zdCBmbSA9IGNhY2hlICYmIGNhY2hlLmZyb250bWF0dGVyOwogICAgICAgICAgICAKICAgICAgICAgICAgLy8gQ2hlY2sgaWYgZmlsZSBoYXMgdGhlIOW8g+WJpyB0YWcKICAgICAgICAgICAgY29uc3QgdGFncyA9IFtdOwogICAgICAgICAgICAvLyBHZXQgdGFncyBmcm9tIGZyb250bWF0dGVyCiAgICAgICAgICAgIGlmIChmbSAmJiBmbS50YWdzKSB7CiAgICAgICAgICAgICAgICBpZiAoQXJyYXkuaXNBcnJheShmbS50YWdzKSkgewogICAgICAgICAgICAgICAgICAgIHRhZ3MucHVzaC5hcHBseSh0YWdzLCBmbS50YWdzKTsKICAgICAgICAgICAgICAgIH0gZWxzZSBpZiAodHlwZW9mIGZtLnRhZ3MgPT09ICdzdHJpbmcnKSB7CiAgICAgICAgICAgICAgICAgICAgdGFncy5wdXNoKGZtLnRhZ3MpOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgICAgIC8vIEdldCBpbmxpbmUgdGFncyBmcm9tIGNhY2hlCiAgICAgICAgICAgIGlmIChjYWNoZSAmJiBjYWNoZS50YWdzKSB7CiAgICAgICAgICAgICAgICBmb3IgKHZhciBpID0gMDsgaSA8IGNhY2hlLnRhZ3MubGVuZ3RoOyBpKyspIHsKICAgICAgICAgICAgICAgICAgICB0YWdzLnB1c2goY2FjaGUudGFnc1tpXS50YWcucmVwbGFjZSgvXiMvLCAnJykpOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgICAgIAogICAgICAgICAgICAvLyBDaGVjayBpZiDlvIPliacgdGFnIGV4aXN0cwogICAgICAgICAgICB2YXIgaGFzRHJvcHBlZFRhZyA9IGZhbHNlOwogICAgICAgICAgICBmb3IgKHZhciBqID0gMDsgaiA8IHRhZ3MubGVuZ3RoOyBqKyspIHsKICAgICAgICAgICAgICAgIGlmICh0YWdzW2pdID09PSAn5byD5YmnJykgewogICAgICAgICAgICAgICAgICAgIGhhc0Ryb3BwZWRUYWcgPSB0cnVlOwogICAgICAgICAgICAgICAgICAgIGJyZWFrOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgICAgIAogICAgICAgICAgICByZXR1cm4gZm0gJiYgZm0u5oC76ZuG5pWwICYmIGZtLuW8gOWni+eci+aXpeacnyAmJiAhZm0u55yL6L+H5pel5pyfICYmICFoYXNEcm9wcGVkVGFnOwogICAgICAgIH0pCiAgICAgICAgLm1hcChmdW5jdGlvbihmKSB7IHJldHVybiBmLmJhc2VuYW1lOyB9KQogICAgICAgIC5zb3J0KCk7CgogICAgaWYgKHNob3dzLmxlbmd0aCA9PT0gMCkgewogICAgICAgIG5ldyBOb3RpY2UoIuayoeacieaJvuWIsOato+WcqOingueci+eahOeUteinhuWJpyIpOwogICAgICAgIHJldHVybjsKICAgIH0KCiAgICBjb25zdCBzZWxlY3RlZCA9IGF3YWl0IHF1aWNrQWRkQXBpLnN1Z2dlc3RlcihzaG93cywgc2hvd3MpOwogICAgaWYgKCFzZWxlY3RlZCkgcmV0dXJuOwoKICAgIGNvbnN0IGVwaXNvZGVzID0gYXdhaXQgcXVpY2tBZGRBcGkuaW5wdXRQcm9tcHQoIueci+i/h+mbhuaVsCIpOwogICAgaWYgKCFlcGlzb2RlcykgcmV0dXJuOwoKICAgIGNvbnN0IGZpbGUgPSBhcHAud29ya3NwYWNlLmdldEFjdGl2ZUZpbGUoKTsKICAgIGlmICghZmlsZSkgewogICAgICAgIG5ldyBOb3RpY2UoIuivt+WFiOaJk+W8gOS4gOS4queslOiusCIpOwogICAgICAgIHJldHVybjsKICAgIH0KICAgIAogICAgdmFyIGNvbnRlbnQgPSBhd2FpdCBhcHAudmF1bHQucmVhZChmaWxlKTsKICAgIHZhciBuZXdFbnRyeSA9ICItIFtbIiArIHNlbGVjdGVkICsgIl1dIOeci+i/h+mbhuaVsDo6ICIgKyBlcGlzb2RlczsKICAgIAogICAgY29uc3QgY2FjaGUgPSBhcHAubWV0YWRhdGFDYWNoZS5nZXRGaWxlQ2FjaGUoZmlsZSk7CiAgICBjb25zdCBoZWFkaW5ncyA9IChjYWNoZSAmJiBjYWNoZS5oZWFkaW5ncykgfHwgW107CiAgICAKICAgIC8vIEZpbmQgdGhlIGhlYWRpbmcgdGhhdCBlbmRzIHdpdGgg55yL55S16KeGCiAgICB2YXIgdGFyZ2V0SGVhZGluZyA9IG51bGw7CiAgICBmb3IgKHZhciBpID0gMDsgaSA8IGhlYWRpbmdzLmxlbmd0aDsgaSsrKSB7CiAgICAgICAgdmFyIGggPSBoZWFkaW5nc1tpXTsKICAgICAgICBpZiAoaC5sZXZlbCA9PT0gMiAmJiBoLmhlYWRpbmcuZW5kc1dpdGgoIueci+eUteinhiIpKSB7CiAgICAgICAgICAgIHRhcmdldEhlYWRpbmcgPSBoOwogICAgICAgICAgICBicmVhazsKICAgICAgICB9CiAgICB9CiAgICAKICAgIGlmICghdGFyZ2V0SGVhZGluZykgewogICAgICAgIG5ldyBOb3RpY2UoIuayoeacieaJvuWIsOeci+eUteinhuagh+mimCIpOwogICAgICAgIHJldHVybjsKICAgIH0KICAgIAogICAgdmFyIGxpbmVzID0gY29udGVudC5zcGxpdCgiXG4iKTsKICAgIHZhciBzdGFydExpbmUgPSB0YXJnZXRIZWFkaW5nLnBvc2l0aW9uLnN0YXJ0LmxpbmU7CiAgICAKICAgIC8vIEZpbmQgdGhlIGVuZCBvZiB0aGlzIHNlY3Rpb24KICAgIHZhciBlbmRMaW5lID0gbGluZXMubGVuZ3RoOwogICAgZm9yICh2YXIgaiA9IDA7IGogPCBoZWFkaW5ncy5sZW5ndGg7IGorKykgewogICAgICAgIHZhciBoZWFkaW5nID0gaGVhZGluZ3Nbal07CiAgICAgICAgaWYgKGhlYWRpbmcucG9zaXRpb24uc3RhcnQubGluZSA+IHN0YXJ0TGluZSAmJiBoZWFkaW5nLmxldmVsIDw9IDIpIHsKICAgICAgICAgICAgZW5kTGluZSA9IGhlYWRpbmcucG9zaXRpb24uc3RhcnQubGluZTsKICAgICAgICAgICAgYnJlYWs7CiAgICAgICAgfQogICAgfQogICAgCiAgICAvLyBDaGVjayBpZiB0aGlzIHNob3cgYWxyZWFkeSBleGlzdHMgaW4gdGhpcyBzZWN0aW9uCiAgICB2YXIgZXhpc3RpbmdMaW5lSW5kZXggPSAtMTsKICAgIHZhciBzZWFyY2hTdHIgPSAiLSBbWyIgKyBzZWxlY3RlZCArICJdXSDnnIvov4fpm4bmlbA6OiAiOwogICAgZm9yICh2YXIgayA9IHN0YXJ0TGluZSArIDE7IGsgPCBlbmRMaW5lOyBrKyspIHsKICAgICAgICBpZiAobGluZXNba10uaW5kZXhPZihzZWFyY2hTdHIpID09PSAwKSB7CiAgICAgICAgICAgIGV4aXN0aW5nTGluZUluZGV4ID0gazsKICAgICAgICAgICAgYnJlYWs7CiAgICAgICAgfQogICAgfQogICAgCiAgICBpZiAoZXhpc3RpbmdMaW5lSW5kZXggIT09IC0xKSB7CiAgICAgICAgbGluZXNbZXhpc3RpbmdMaW5lSW5kZXhdID0gbmV3RW50cnk7CiAgICAgICAgYXdhaXQgYXBwLnZhdWx0Lm1vZGlmeShmaWxlLCBsaW5lcy5qb2luKCJcbiIpKTsKICAgICAgICBuZXcgTm90aWNlKCLlt7Lmm7TmlrA6ICIgKyBzZWxlY3RlZCArICIgLSAiICsgZXBpc29kZXMgKyAi6ZuGIik7CiAgICB9IGVsc2UgewogICAgICAgIGxpbmVzLnNwbGljZShlbmRMaW5lLCAwLCBuZXdFbnRyeSk7CiAgICAgICAgYXdhaXQgYXBwLnZhdWx0Lm1vZGlmeShmaWxlLCBsaW5lcy5qb2luKCJcbiIpKTsKICAgICAgICBuZXcgTm90aWNlKCLlt7Lmt7vliqA6ICIgKyBzZWxlY3RlZCArICIgLSAiICsgZXBpc29kZXMgKyAi6ZuGIik7CiAgICB9Cn07"
+    },
+    {
+      "kind": "user-script",
+      "originalPath": "Helper/utils/dailyAddBook.js",
+      "contentEncoding": "base64",
+      "content": "bW9kdWxlLmV4cG9ydHMgPSBhc3luYyAocGFyYW1zKSA9PiB7CiAgICBjb25zdCB7IGFwcCwgcXVpY2tBZGRBcGkgfSA9IHBhcmFtczsKICAgIAogICAgLy8gR2V0IGFsbCBib29rcyB3aXRoIHN0YXR1cyAi5Zyo55yLIgogICAgY29uc3QgYm9va3MgPSBhcHAudmF1bHQuZ2V0TWFya2Rvd25GaWxlcygpCiAgICAgICAgLmZpbHRlcihmID0+IHsKICAgICAgICAgICAgLy8gQ2hlY2sgaWYgZmlsZSBpcyBpbiB0aGUg55+l6K+G5bqTL+ivu+S5pueslOiusCBmb2xkZXIKICAgICAgICAgICAgaWYgKCFmLnBhdGguc3RhcnRzV2l0aCgn55+l6K+G5bqTL+ivu+S5pueslOiusC8nKSkgcmV0dXJuIGZhbHNlOwogICAgICAgICAgICAKICAgICAgICAgICAgY29uc3QgY2FjaGUgPSBhcHAubWV0YWRhdGFDYWNoZS5nZXRGaWxlQ2FjaGUoZik7CiAgICAgICAgICAgIGNvbnN0IGZtID0gY2FjaGU/LmZyb250bWF0dGVyOwogICAgICAgICAgICAKICAgICAgICAgICAgLy8gSGFuZGxlIGJvdGggYXJyYXkgYW5kIHN0cmluZyBzdGF0dXMKICAgICAgICAgICAgaWYgKEFycmF5LmlzQXJyYXkoZm0/LnN0YXR1cykpIHsKICAgICAgICAgICAgICAgIHJldHVybiBmbS5zdGF0dXMuaW5jbHVkZXMoJ+WcqOeciycpOwogICAgICAgICAgICB9CiAgICAgICAgICAgIHJldHVybiBmbT8uc3RhdHVzID09PSAn5Zyo55yLJzsKICAgICAgICB9KQogICAgICAgIC5tYXAoZiA9PiBmLmJhc2VuYW1lKQogICAgICAgIC5zb3J0KCk7CgogICAgaWYgKGJvb2tzLmxlbmd0aCA9PT0gMCkgewogICAgICAgIG5ldyBOb3RpY2UoIuayoeacieaJvuWIsOato+WcqOmYheivu+eahOS5puexjSIpOwogICAgICAgIHJldHVybjsKICAgIH0KCiAgICBjb25zdCBzZWxlY3RlZCA9IGF3YWl0IHF1aWNrQWRkQXBpLnN1Z2dlc3Rlcihib29rcywgYm9va3MpOwogICAgaWYgKCFzZWxlY3RlZCkgcmV0dXJuOwoKICAgIGNvbnN0IHBhZ2VzID0gYXdhaXQgcXVpY2tBZGRBcGkuaW5wdXRQcm9tcHQoIuWujOaIkOmhteaVsCIpOwogICAgaWYgKCFwYWdlcykgcmV0dXJuOwoKICAgIC8vIEdldCB0aGUgYWN0aXZlIGZpbGUKICAgIGNvbnN0IGZpbGUgPSBhcHAud29ya3NwYWNlLmdldEFjdGl2ZUZpbGUoKTsKICAgIGlmICghZmlsZSkgewogICAgICAgIG5ldyBOb3RpY2UoIuivt+WFiOaJk+W8gOS4gOS4queslOiusCIpOwogICAgICAgIHJldHVybjsKICAgIH0KICAgIAogICAgbGV0IGNvbnRlbnQgPSBhd2FpdCBhcHAudmF1bHQucmVhZChmaWxlKTsKICAgIAogICAgLy8gQ2hlY2sgaWYgdGhpcyBib29rIGFscmVhZHkgZXhpc3RzIGluIHRvZGF5J3Mgbm90ZQogICAgY29uc3QgYm9va1BhdHRlcm4gPSBuZXcgUmVnRXhwKGBeLSBcXFtcXFske3NlbGVjdGVkLnJlcGxhY2UoL1suKis/XiR7fSgpfFtcXVxcXS9nLCAnXFwkJicpfVxcXVxcXSDlrozmiJDpobXmlbA6OiBcXGQrJGAsICdnbScpOwogICAgY29uc3QgZXhpc3RpbmdNYXRjaCA9IGNvbnRlbnQubWF0Y2goYm9va1BhdHRlcm4pOwogICAgCiAgICBjb25zdCBuZXdFbnRyeSA9IGAtIFtbJHtzZWxlY3RlZH1dXSDlrozmiJDpobXmlbA6OiAke3BhZ2VzfWA7CiAgICAKICAgIGlmIChleGlzdGluZ01hdGNoKSB7CiAgICAgICAgLy8gT3ZlcndyaXRlIGV4aXN0aW5nIGVudHJ5CiAgICAgICAgY29udGVudCA9IGNvbnRlbnQucmVwbGFjZShib29rUGF0dGVybiwgbmV3RW50cnkpOwogICAgICAgIGF3YWl0IGFwcC52YXVsdC5tb2RpZnkoZmlsZSwgY29udGVudCk7CiAgICAgICAgbmV3IE5vdGljZShg4pyP77iPIOW3suabtOaWsDogJHtzZWxlY3RlZH0gLSAke3BhZ2VzfemhtWApOwogICAgfSBlbHNlIHsKICAgICAgICAvLyBBZGQgbmV3IGVudHJ5CiAgICAgICAgY29uc3QgbmV3Q29udGVudCA9IGNvbnRlbnQgKyBgXG4ke25ld0VudHJ5fWA7CiAgICAgICAgYXdhaXQgYXBwLnZhdWx0Lm1vZGlmeShmaWxlLCBuZXdDb250ZW50KTsKICAgICAgICBuZXcgTm90aWNlKGDinIUg5bey5re75YqgOiAke3NlbGVjdGVkfSAtICR7cGFnZXN96aG1YCk7CiAgICB9Cn07"
+    },
+    {
+      "kind": "template",
+      "originalPath": "Helper/Templates/Daily Note.md",
+      "contentEncoding": "base64",
+      "content": "LS0tCmFsaWFzZXM6IFtdCnRhZ3M6IFtdCmNzc2NsYXNzZXM6CiAgLSBoaWRlLWZyb250bWF0dGVyCmFjdGl2aXR5X3RhZ3M6IFtdCm1lZGljYWxfdGFnczoKZGF5OgptZWRpY2F0aW9uX2xvbmc6CiAgLSDlkIPoja8vQWxsZWdyYQogIC0g5ZCD6I2vL0dseWNvcHlycmxhdGUtMQogIC0g5ZCD6I2vL0p1bmVsMS0yMAogIC0g5ZCD6I2vL0FjZXR5bGN5c3RlaW5lLU5BQwogIC0g5ZCD6I2vL1pvbG9mdC0xMjVtZwpTdXBwbGVtZW50czoKICAtIOWQg+iNry/kv53lgaXlk4Ev6bG85rK5CiAgLSDlkIPoja8v5L+d5YGl5ZOBL+e7tOeUn+e0oEQKICAtIOWQg+iNry/kv53lgaXlk4Ev57u055Sf57SgSwogIC0g5ZCD6I2vL+S/neWBpeWTgS/plYEtMgogIC0g5ZCD6I2vL+S/neWBpeWTgS9Qc3lsbGl1bUh1c2stMwptZWRpY2F0aW9uOgrkvZPph406CuWBh+acnzoK5LuK5pel55Sa5aW9OiBmYWxzZQotLS0KIVtbZGF5T2ZXZWVrfG5vLXRpdGxlXV0KIVtbZGFpbHlOYXZpZ2F0aW9uXV0KIVtbZ2VuVE9DXV0KKirwn4+u5LuK5pel55Sa5aW98J+PrjoqKiBgSU5QVVRbdG9nZ2xlKGNsYXNzKG15LXRvZ2dsZSkpOuS7iuaXpeeUmuWlvV1gCioq8J+qt+S7iuWkqeayoeS5sPCfqrc6KiogYElOUFVUW3RvZ2dsZShjbGFzcyhteS10b2dnbGUpKTpub0J1eV1gCiMgMSDml6XmgLvnu5MKKirimpbvuI/kvZPph406KipgSU5QVVRbbnVtYmVyOuS9k+mHjV1gCgpgYGBkYXRhdmlld2pzCmNvbnN0IGYgPSBhcHAud29ya3NwYWNlLmdldEFjdGl2ZUZpbGUoKTsKaWYgKCFmKSByZXR1cm47Cgpjb25zdCBjdXJyZW50UGF0aCA9IGYucGF0aDsgLy8gQ2FwdHVyZSBwYXRoIGFzIHN0cmluZywgbm90IGZpbGUgcmVmZXJlbmNlCgovLyBBY3Rpdml0eSBtYXBwaW5nCmNvbnN0IGFjdGl2aXR5TWFwID0gewogICAgYWN0aXZpdHlfdGVubmlzOiAi8J+OviIsCiAgICBhY3Rpdml0eV9zaW5naW5nOiAi8J+OpCIsCiAgICBhY3Rpdml0eV9zd2ltbWluZzogIvCfj4oiLAogICAgYWN0aXZpdHlfYm94aW5nOiAi8J+liiIsCiAgICBhY3Rpdml0eV93ZWlnaHRzOiAi8J+Pi++4jyIKfTsKCi8vIEF1dG8tc3luYyBmdW5jdGlvbgpjb25zdCBzeW5jID0gYXN5bmMgKCkgPT4gewogIGNvbnN0IGN1cnJlbnRGaWxlID0gYXBwLnZhdWx0LmdldEFic3RyYWN0RmlsZUJ5UGF0aChjdXJyZW50UGF0aCk7CiAgaWYgKCFjdXJyZW50RmlsZSkgcmV0dXJuOwogIAogIGF3YWl0IGFwcC5maWxlTWFuYWdlci5wcm9jZXNzRnJvbnRNYXR0ZXIoY3VycmVudEZpbGUsIChmbSkgPT4gewogICAgLy8gc3luYyBsb2dpYyBwbGFjZWhvbGRlcgogIH0pOwp9OwoKLy8gRGVib3VuY2VkIHN5bmMKbGV0IHRpbWVvdXQ7CmNvbnN0IGF1dG9TeW5jID0gKCkgPT4gewogIGNsZWFyVGltZW91dCh0aW1lb3V0KTsKICB0aW1lb3V0ID0gc2V0VGltZW91dChhc3luYyAoKSA9PiB7CiAgICBhd2FpdCBzeW5jKCk7CiAgfSwgMTAwMCk7Cn07CgovLyBVc2UgY29tcG9uZW50LXNjb3BlZCBldmVudCByZWdpc3RyYXRpb24gKGF1dG8tY2xlYW51cCkKY29uc3QgbGlzdGVuZXJLZXkgPSBgYXV0b1N5bmNfJHtjdXJyZW50UGF0aH1gOwppZiAoIXdpbmRvd1tsaXN0ZW5lcktleV0pIHsKICB3aW5kb3dbbGlzdGVuZXJLZXldID0gdHJ1ZTsKICAKICB0aGlzLnJlZ2lzdGVyRXZlbnQoCiAgICBhcHAudmF1bHQub24oJ21vZGlmeScsIChmaWxlKSA9PiB7CiAgICAgIGlmIChmaWxlLnBhdGggPT09IGN1cnJlbnRQYXRoKSB7CiAgICAgICAgYXV0b1N5bmMoKTsKICAgICAgfQogICAgfSkKICApOwogIAogIC8vIENsZWFudXAgd2hlbiBjb21wb25lbnQgdW5sb2FkcwogIHRoaXMucmVnaXN0ZXIoKCkgPT4gewogICAgZGVsZXRlIHdpbmRvd1tsaXN0ZW5lcktleV07CiAgICBjbGVhclRpbWVvdXQodGltZW91dCk7CiAgfSk7Cn0KYGBgCioq8J+OryBBY3Rpdml0aWVzOioqIGBJTlBVVFtpbmxpbmVMaXN0U3VnZ2VzdGVyKG9wdGlvbih0aGVyYXB5KSwgb3B0aW9uKOWBpei6q+aIvyksIG9wdGlvbijlrabkuaApLCBvcHRpb24o5LiL5Y6oKSwgb3B0aW9uKOeci+aIjyksIG9wdGlvbijlh7rljrvnjqkpKTphY3Rpdml0eV90YWdzXWAKCS0g8J+OviBgSU5QVVRbdG9nZ2xlOmFjdGl2aXR5X3Rlbm5pc11gCgktIPCfjqQgYElOUFVUW3RvZ2dsZTphY3Rpdml0eV9zaW5naW5nXWAKCS0g8J+PiiBgSU5QVVRbdG9nZ2xlOmFjdGl2aXR5X3N3aW1taW5nXWAKCQkJLSDwn6WKIGBJTlBVVFt0b2dnbGU6YWN0aXZpdHlfYm94aW5nXWAKCS0g8J+Pi++4jyBgSU5QVVRbdG9nZ2xlOmFjdGl2aXR5X3dlaWdodHNdYAoK8J+Tuu+8mmBCVVRUT05bcWFfdHZdYAoKKirwn4+lIE1lZGljYWw6KiogYElOUFVUW2lubGluZUxpc3RTdWdnZXN0ZXIob3B0aW9uKERlcm1hdG9sb2dpc3QpLCBvcHRpb24oUHN5Y2hpYXRyaXN0KSwgb3B0aW9uKEdhc3Ryb2VudGVyb2xvZ2lzdCksIG9wdGlvbihEZW50aXN0KSwgb3B0aW9uKE9waHRoYWxtb2xvZ2lzdCksIG9wdGlvbihQQ1ApLCBvcHRpb24oVXJnZW50Q2FyZSksIG9wdGlvbihPQkdZTiksIG9wdGlvbihBbGxlcmdpc3QpKTptZWRpY2FsX3RhZ3NdYAoKKirwn5KK6ZW/5pyfTWVkaWNhdGlvbjoqKiBgSU5QVVRbaW5saW5lTGlzdFN1Z2dlc3RlcihvcHRpb24o5ZCD6I2vL1pvbG9mdC0xMjVtZyksIG9wdGlvbijlkIPoja8vQWxsZWdyYSksIG9wdGlvbijlkIPoja8vR2x5Y29weXJybGF0ZS0xKSwgb3B0aW9uKOWQg+iNry9KdW5lbDEtMjApLCBvcHRpb24o5ZCD6I2vL0FjZXR5bGN5c3RlaW5lLU5BQykpOm1lZGljYXRpb25fbG9uZ11gCgoqKvCfp6pTdXBwbGVtZW50czoqKiBgSU5QVVRbaW5saW5lTGlzdFN1Z2dlc3RlcihvcHRpb24o5ZCD6I2vL+S/neWBpeWTgS/psbzmsrkpLCBvcHRpb24o5ZCD6I2vL+S/neWBpeWTgS/nu7TnlJ/ntKBEKSwgb3B0aW9uKOWQg+iNry/kv53lgaXlk4Ev57u055Sf57SgSyksIG9wdGlvbijlkIPoja8v5L+d5YGl5ZOBL+mVgS0yKSwgb3B0aW9uKOWQg+iNry/kv53lgaXlk4EvUHN5bGxpdW1IdXNrLTMpKTpTdXBwbGVtZW50c11gCgoqKvCfmLflkIPoja/vvJoqKmBJTlBVVFtpbmxpbmVMaXN0U3VnZ2VzdGVyKG9wdGlvbijlkIPoja8vU3VkYWZlZC1Qc2V1ZG9lcGhlZHJpbmUpLG9wdGlvbijlkIPoja8v5rOw6K+6KSk6bWVkaWNhdGlvbl1gCgoqKvCfj5bvuI/lgYfmnJ/vvJoqKmBJTlBVVFtpbmxpbmVMaXN0U3VnZ2VzdGVyKG9wdGlvbijmlL7lgYcvUFRPKSxvcHRpb24o5pS+5YGHL+eXheWBhyksb3B0aW9uKOaUvuWBhy/lhazlhbHlgYfmnJ8pKTrlgYfmnJ9dYAojIyAxLjEg8J+PoCDlrrbliqHku7vliqEKKirwn6e5IOWcsOmdoua4hea0gToqKiBgSU5QVVRbaW5saW5lTGlzdFN1Z2dlc3RlcihvcHRpb24o5ZC45bCYKSwgb3B0aW9uKOaLluWcsCkpOmh3X2Zsb29yXWAKCioq8J+bjCDljaflrqQ6KipgSU5QVVRbaW5saW5lTGlzdFN1Z2dlc3RlcihvcHRpb24o5o2i5bqK5Y2VKSwgb3B0aW9uKOaNouiiq+WllykpOmh3X2JlZHJvb21dYAoKKirwn5GaIOiho+eJqe+8mioqYElOUFVUW2lubGluZUxpc3RTdWdnZXN0ZXIob3B0aW9uKOa0l+iho+acjSksIG9wdGlvbijlj6DooaPmnI0pLCBvcHRpb24o5pW055CGL+WNlk1lcmNhcmkpKTpod19sYXVuZHJ5XWAKCioq8J+avyDmtbTlrqTmuIXmtIHvvJoqKmBJTlBVVFtpbmxpbmVMaXN0U3VnZ2VzdGVyKG9wdGlvbijliLfpqazmobYpLCBvcHRpb24o5rSX5omL5Y+wKSwgb3B0aW9uKOa1tOWupOWcsOmdoikpOmh3X2JhdGhyb29tXWAKCioq8J+UqiDljqjmiL/muIXmtIHvvJoqKmBJTlBVVFtpbmxpbmVMaXN0U3VnZ2VzdGVyKG9wdGlvbijljqjmiL/msLTmsaApLCBvcHRpb24o5pW055CGL+WOqOaIv+WPsOmdoikpOmh3X2tpdGNoZW5dYAoKKio6RG9GdWxsVHJhc2g65pu/5o2i77yaKipgSU5QVVRbaW5saW5lTGlzdFN1Z2dlc3RlcihvcHRpb24o5pu/5o2iL+eMq+egguebhmxpbmVyKSwgb3B0aW9uKOabv+aNoi/nqbrosIPmu6TnvZEpLCBvcHRpb24o5pu/5o2iL+epuuawlOWHgOWMluWZqGZpbHRlcikpOmh3X3JlbmV3XWAKIyAyIOeslOiusAohW1tkYWlseU1vZGlmeS5iYXNlfG9yZGVyZWQtbGlzdF1dCgo8JSoKY29uc3QgbW9tZW50ID0gd2luZG93Lm1vbWVudDsKY29uc3QgYmFzZURhdGUgPSBtb21lbnQodHAuZmlsZS50aXRsZSwgIllZWVktTU0tREQiKTsKCmNvbnN0IHN0YXJ0RGF0ZSA9IGJhc2VEYXRlLmNsb25lKCkuc3VidHJhY3QoMSwgJ2RheXMnKS5mb3JtYXQoIllZWVktTU0tREQiKTsKY29uc3QgZW5kRGF0ZSA9IGJhc2VEYXRlLmNsb25lKCkuYWRkKDcsICdkYXlzJykuZm9ybWF0KCJZWVlZLU1NLUREIik7Cgp0UiArPSAiYGBgdGFza3NcbiI7CnRSICs9ICJub3QgZG9uZVxuIjsKdFIgKz0gImZpbHRlciBieSBmdW5jdGlvbiB0YXNrLnN0YXR1cy5zeW1ib2wgIT09ICc+J1xuIjsKdFIgKz0gYGhhcHBlbnMgYWZ0ZXIgJHtzdGFydERhdGV9XG5gOwp0UiArPSBgaGFwcGVucyBiZWZvcmUgJHtlbmREYXRlfVxuYDsKdFIgKz0gInNvcnQgYnkgZHVlXG4iOwp0UiArPSAiYGBgXG4iOwoKdFIgKz0iYGBgdGFza3NcbiI7CnRSICs9IGBkb25lICR7YmFzZURhdGV9XG5gOwp0UiArPSAiYGBgXG4iOwolPgohW1vml6XluLjlt6XlhbctMjAyNTA5MDEuYmFzZSPljbPlsIbliLDmnJ/orqLpmIVdXQoKIyAzIEV2ZW50CiMjIDMuMSDnnIvnlLXop4YKYEJVVFRPTlthZGRTaG93XWAKCiMjIDMuMiDor7vkuaYKYEJVVFRPTlthZGRCb29rXWA="
+    }
+  ]
+}
