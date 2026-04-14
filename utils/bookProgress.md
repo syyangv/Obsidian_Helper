@@ -1,3 +1,6 @@
+---
+modified_at: 2026-01-28
+---
 ```dataviewjs
 const actualCurrentFile = app.workspace.getActiveFile();
 const bookName = actualCurrentFile.basename;

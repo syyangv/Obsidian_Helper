@@ -1,3 +1,6 @@
+---
+modified_at: 2026-04-12
+---
 ```dataviewjs
 (async () => {
     // ===== PREVENT MULTIPLE SIMULTANEOUS EXECUTIONS =====
@@ -73,15 +76,7 @@ try {
         const isFinished = totalEpisodes && latestProgress >= totalEpisodes;
         const isAbandoned = metadata.file.tags && metadata.file.tags.includes('#弃剧');
 
-        if (latestProgress !== currentInFrontmatter) {
-            const file = app.vault.getAbstractFileByPath(actualCurrentFile.path);
-            await app.fileManager.processFrontMatter(file, (fm) => {
-                fm.看过集数 = latestProgress;
-            });
-            dv.paragraph(`✅ **已自动同步**: 更新为第 ${latestProgress} 集 / ${totalEpisodes || '?'} 集 ${isFinished ? '🎉 已完成!' : ''}`);
-        } else {
-            dv.paragraph(`**当前进度**: 第 ${latestProgress} 集 / ${totalEpisodes || '?'} 集 ${isFinished ? '🎉 已完成!' : ''}`);
-        }
+        dv.paragraph(`**当前进度**: 第 ${latestProgress} 集 / ${totalEpisodes || '?'} 集 ${isFinished ? '🎉 已完成!' : ''}`);
 
         // Create custom timeline chart
         const firstDate = new Date(progressData[0].date);

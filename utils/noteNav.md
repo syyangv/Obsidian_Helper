@@ -1,34 +1,17 @@
+---
+modified_at: 2026-04-14
+---
 ```dataviewjs
-(async () => {
-    // ===== PREVENT MULTIPLE SIMULTANEOUS EXECUTIONS =====
-    const activeFile = app.workspace.getActiveFile();
-    if (!activeFile) return;
-
-    const containerId = 'note-nav-' + activeFile.path;
-
-    // If already running, skip this execution
-    if (window[containerId + '_running']) return;
-
-    // Set debounce timeout - only execute after 500ms of inactivity
-    if (window[containerId + '_timeout']) {
-        clearTimeout(window[containerId + '_timeout']);
-    }
-
-    await new Promise(resolve => {
-        window[containerId + '_timeout'] = setTimeout(resolve, 500);
-    });
-
-    // Skip rendering if user is actively editing an input field
-    const activeEl = document.activeElement;
-    if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) {
-        return;
-    }
-
-    window[containerId + '_running'] = true;
-
+(function () {
 try {
-    // Get the active file (the one being viewed), not the embedded template
-    const page = activeFile ? dv.page(activeFile.path) : null;
+    const helperPath = "Helper/utils/noteNav";
+    const current = dv.current();
+    const currentPath = current?.file?.path;
+    const activePath = app.workspace.getActiveFile()?.path;
+    const targetPath = currentPath && !currentPath.includes(helperPath) ? currentPath : activePath;
+    if (!targetPath) return;
+
+    const page = dv.page(targetPath);
     const file = page?.file;
     const folderPath = file?.folder || '';
 
@@ -138,11 +121,9 @@ if (next) {
 } else {
     rightDiv.createSpan({ text: '', attr: { style: 'opacity:0;' } });
 }
-    }
+}
 } catch (error) {
     console.error("noteNav error:", error);
-} finally {
-    window[containerId + '_running'] = false;
 }
 })();
 ```

@@ -1,3 +1,6 @@
+---
+modified_at: 2026-03-12
+---
 ```dataviewjs
 const file = app.workspace.getActiveFile();
 if (!file) { dv.paragraph('⚠️ No active file'); return; }

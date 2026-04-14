@@ -1,3 +1,6 @@
+---
+modified_at: 2025-05-24
+---
 # DQL
 Similar to SQL with what comes after `SELECT`
 -  `property` is the metadata property within a note

@@ -1,3 +1,6 @@
+---
+modified_at: 2025-07-06
+---
 # Templater Tick Grid Usage Examples
 
 ## 📁 Setup Instructions

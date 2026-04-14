@@ -25,6 +25,7 @@ medication:
 今日甚好: false
 noBuy: false
 小饭桌: false
+modified_at: 2026-04-08
 ---
 ![[dayOfWeek|no-title]]
 ![[dailyNavigation]]

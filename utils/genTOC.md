@@ -1,10 +1,16 @@
 ---
 tags: []
+modified_at: 2026-04-14
 ---
 ```dataviewjs
-(async () => {
+(function () {
     const startHeadingLevel = 1;
-    const file = app.workspace.getActiveFile();
+    const helperPath = "Helper/utils/genTOC";
+    const current = dv.current();
+    const currentPath = current?.file?.path;
+    const activePath = app.workspace.getActiveFile()?.path;
+    const targetPath = currentPath && !currentPath.includes(helperPath) ? currentPath : activePath;
+    const file = targetPath ? app.vault.getAbstractFileByPath(targetPath) : null;
 
     // Check if file exists
     if (!file) {

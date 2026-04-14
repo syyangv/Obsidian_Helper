@@ -1,6 +1,7 @@
 ---
-tags: 
+tags:
 aliases: []
+modified_at: 2026-04-14
 ---
 ```meta-bind-button
 style: primary
@@ -17,7 +18,7 @@ Calendar View
 ````
 ```tracker
 searchType: frontmatter
-searchTarget: <property> #e.g. Task 1
+searchTarget: <property> \#e.g. Task 1
 folder: <>
 startDate: <YYYY-MM-DD>
 endDate: <YYYY-MM-DD>
@@ -25,8 +26,8 @@ fixedScale: 1.3 # optional
 
 # VIEWS
 month: # month view of tracking
-	mode: annotation #optional
-	annotation: <emoji> #optional
+mode: annotation \#optional
+annotation: <emoji> \#optional
 	startWeekOn: 'Sun'
 	color: <>
 	
@@ -56,4 +57,3 @@ startDate: 2025-04-01
 line:
 	title: Word Counter
 ```
-

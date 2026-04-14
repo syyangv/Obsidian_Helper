@@ -1,3 +1,6 @@
+---
+modified_at: 2025-10-05
+---
 
 ```dataviewjs
 // Recipe Tracker Template - Save as "Templates/recipe-tracker.md"

@@ -13,15 +13,6 @@ function sanitizeFileName(name) {
         .trim();
 }
 
-function normalizeBookTitle(title) {
-    return String(title || "")
-        .replace(/([a-z])([A-Z])/g, "$1 $2")
-        .replace(/([A-Z])([A-Z][a-z])/g, "$1 $2")
-        .replace(/\s*'\s*/g, "'")
-        .replace(/\s+/g, " ")
-        .trim();
-}
-
 function getToday() {
     return window.moment().format("YYYY-MM-DD");
 }
@@ -58,33 +49,6 @@ async function getBookTemplateBody(app) {
 async function openFile(app, file) {
     const leaf = app.workspace.getLeaf("tab");
     await leaf.openFile(file);
-}
-
-async function renameImportedBookIfNeeded(app, file) {
-    const cache = app.metadataCache.getFileCache(file);
-    const currentTitle = cache?.frontmatter?.title || file.basename;
-    const normalizedTitle = normalizeBookTitle(currentTitle);
-
-    if (!normalizedTitle || normalizedTitle === currentTitle) {
-        return file;
-    }
-
-    let targetFile = file;
-    const desiredPath = getAvailableBookPath(app, normalizedTitle);
-
-    if (desiredPath !== file.path) {
-        await app.fileManager.renameFile(file, desiredPath);
-        const renamedFile = app.vault.getAbstractFileByPath(desiredPath);
-        if (renamedFile) {
-            targetFile = renamedFile;
-        }
-    }
-
-    await app.fileManager.processFrontMatter(targetFile, (fm) => {
-        fm.title = normalizedTitle;
-    });
-
-    return targetFile;
 }
 
 async function applyStatus(app, file, status) {
@@ -186,7 +150,6 @@ async function importFromDouban(app, status) {
         return;
     }
 
-    targetFile = await renameImportedBookIfNeeded(app, targetFile);
     await applyStatus(app, targetFile, status);
     await openFile(app, targetFile);
     new Notice(`已导入并设置状态: ${targetFile.basename} -> ${status}`);
@@ -196,27 +159,21 @@ module.exports = async (params) => {
     const { app, quickAddApi } = params;
 
     const shouldImport = await quickAddApi.suggester(
-        ["从豆瓣导入", "直接新建"],
+        ["是，从豆瓣导入", "否，直接新建"],
         [true, false]
     );
     if (shouldImport == null) return;
-
-    if (shouldImport) {
-        const status = await quickAddApi.suggester(
-            ["想看", "在看"],
-            ["想看", "在看"]
-        );
-        if (!status) return;
-
-        await importFromDouban(app, status);
-        return;
-    }
 
     const status = await quickAddApi.suggester(
         ["想看", "在看"],
         ["想看", "在看"]
     );
     if (!status) return;
+
+    if (shouldImport) {
+        await importFromDouban(app, status);
+        return;
+    }
 
     await createManualBookNote(app, quickAddApi, status);
 };

@@ -1,3 +1,6 @@
+---
+modified_at: 2026-01-31
+---
 ```dataviewjs
 (async () => {
     // Get the actual current file (not the template)

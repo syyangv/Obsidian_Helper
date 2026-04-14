@@ -21,6 +21,7 @@ cooking_patterns:
   - 常做菜品
   - 经典菜谱
   - 长期收藏
+modified_at: 2026-02-03
 ---
 ![[noteNav]]
 # 1 🍳 制作记录

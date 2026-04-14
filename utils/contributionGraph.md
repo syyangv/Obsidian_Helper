@@ -1,3 +1,6 @@
+---
+modified_at: 2026-04-14
+---
 ```dataviewjs
 // ========================================
 // 🎯 贡献图 - Tabbed Contribution Graphs
@@ -172,7 +175,7 @@ try {
     // ========================================
     const editMap = new Map();
     for (const page of allNotes) {
-        const mtime = page.file.mtime;
+        const mtime = page.modified_at || page.file.mtime;
         if (!mtime) continue;
         const editDate = window.moment(mtime.toString()).format("YYYY-MM-DD");
         if (editDate.startsWith(String(CONFIG.year))) {

@@ -1,3 +1,6 @@
+---
+modified_at: 2026-01-22
+---
 ```dataviewjs
 (async () => {
     // ===== PREVENT MULTIPLE SIMULTANEOUS EXECUTIONS =====
