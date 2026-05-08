@@ -66,33 +66,56 @@ try {
         return name.trim();
     }
 
-    // Function to create progress bar
+    // Function to create progress bar (SVG pill — matches 绿卡.md style)
     function createProgressBar(percentage) {
         if (typeof percentage !== 'number' || isNaN(percentage)) {
             percentage = 0;
         }
 
-        const displayPercentage = Math.max(0, percentage);
-        const clampedForBar = Math.min(100, displayPercentage);
+        const pct    = Math.min(100, Math.max(0, percentage));
+        const W = 200, H = 16, R = 8;
+        const filled = (pct / 100) * W;
 
-        const width = 20;
-        const filled = Math.round((clampedForBar / 100) * width);
-        const empty = width - filled;
+        const [c1, c2] =
+            percentage >= 100 ? ["#86efac","#4ade80"] :
+            percentage >= 75  ? ["#4ade80","#16a34a"] :
+            percentage >= 50  ? ["#fbbf24","#ca8a04"] :
+            percentage >= 25  ? ["#fb923c","#ea580c"] :
+                                ["#f87171","#dc2626"];
 
-        let bar = "";
-        if (displayPercentage >= 100) {
-            bar = "🟩".repeat(width);
-        } else if (displayPercentage >= 75) {
-            bar = "🟩".repeat(filled) + "⬛".repeat(empty);
-        } else if (displayPercentage >= 50) {
-            bar = "🟨".repeat(filled) + "⬛".repeat(empty);
-        } else if (displayPercentage >= 25) {
-            bar = "🟧".repeat(filled) + "⬛".repeat(empty);
-        } else {
-            bar = "🟥".repeat(filled) + "⬛".repeat(empty);
-        }
+        const gId = "pg_" + Math.random().toString(36).slice(2, 7);
+        const cId = "cl_" + Math.random().toString(36).slice(2, 7);
 
-        return `${bar} ${displayPercentage.toFixed(1)}%`;
+        return `<svg width="${W}" height="${H}" style="vertical-align:middle">
+  <defs>
+    <linearGradient id="${gId}" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%"   stop-color="${c1}"/>
+      <stop offset="100%" stop-color="${c2}"/>
+    </linearGradient>
+    <clipPath id="${cId}"><rect width="${W}" height="${H}" rx="${R}"/></clipPath>
+  </defs>
+  <rect width="${W}" height="${H}" rx="${R}" fill="#e5e7eb"/>
+  <rect width="${filled}" height="${H}" fill="url(#${gId})" clip-path="url(#${cId})"/>
+</svg><span style="margin-left:8px;font-size:1.1em;">${Math.max(0, percentage).toFixed(1)}%</span>`;
+    }
+
+    function buildTable(container, headers, rows) {
+        container.empty();
+        const tbl = container.createEl("table", { cls: "dataview table-view-table" });
+        const hrow = tbl.createEl("thead").createEl("tr");
+        headers.forEach(h => hrow.createEl("th", { text: h }));
+        const tbody = tbl.createEl("tbody");
+        rows.forEach(row => {
+            const tr = tbody.createEl("tr");
+            row.forEach(cell => {
+                const td = tr.createEl("td");
+                if (typeof cell === "string" && cell.includes("<svg")) {
+                    td.innerHTML = cell;
+                } else {
+                    td.innerHTML = String(cell);
+                }
+            });
+        });
     }
 
     // Get expenses from base folder
@@ -208,7 +231,7 @@ try {
         totalProgressBar
     ]);
 
-    dv.table(["Category", "Credit", "已用", "剩余", "Usage"], rows);
+    buildTable(dv.container, ["Category", "Credit", "已用", "剩余", "Usage"], rows);
 
 } catch (error) {
     console.error('Amex Platinum Reward Error:', error);
