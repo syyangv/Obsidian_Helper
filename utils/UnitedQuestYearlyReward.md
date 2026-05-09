@@ -56,37 +56,42 @@ try {
         return name.trim();
     }
 
-    // Function to create progress bar (SVG pill — matches 绿卡.md style)
+    // Function to create progress bar (Sims needs bar style)
     function createProgressBar(percentage) {
         if (typeof percentage !== 'number' || isNaN(percentage)) {
             percentage = 0;
         }
 
         const pct    = Math.min(100, Math.max(0, percentage));
-        const W = 200, H = 16, R = 8;
+        const W = 200, H = 18, R = 9;
         const filled = (pct / 100) * W;
 
-        const [c1, c2] =
-            percentage >= 100 ? ["#86efac","#4ade80"] :
-            percentage >= 75  ? ["#4ade80","#16a34a"] :
-            percentage >= 50  ? ["#fbbf24","#ca8a04"] :
-            percentage >= 25  ? ["#fb923c","#ea580c"] :
-                                ["#f87171","#dc2626"];
+        const color =
+            pct >= 80 ? "#22c55e" :
+            pct >= 60 ? "#eab308" :
+            pct >= 40 ? "#f97316" :
+            pct >= 20 ? "#ef4444" :
+                        "#b91c1c";
 
-        const gId = "pg_" + Math.random().toString(36).slice(2, 7);
-        const cId = "cl_" + Math.random().toString(36).slice(2, 7);
+        const hId = "hl_" + Math.random().toString(36).slice(2, 7);
+        const cId = "cp_" + Math.random().toString(36).slice(2, 7);
 
         return `<svg width="${W}" height="${H}" style="vertical-align:middle">
   <defs>
-    <linearGradient id="${gId}" x1="0" x2="1" y1="0" y2="0">
-      <stop offset="0%"   stop-color="${c1}"/>
-      <stop offset="100%" stop-color="${c2}"/>
+    <linearGradient id="${hId}" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%"   stop-color="white" stop-opacity="0.52"/>
+      <stop offset="38%"  stop-color="white" stop-opacity="0.09"/>
+      <stop offset="39%"  stop-color="black" stop-opacity="0.00"/>
+      <stop offset="100%" stop-color="black" stop-opacity="0.28"/>
     </linearGradient>
     <clipPath id="${cId}"><rect width="${W}" height="${H}" rx="${R}"/></clipPath>
   </defs>
-  <rect width="${W}" height="${H}" rx="${R}" fill="#e5e7eb"/>
-  <rect width="${filled}" height="${H}" fill="url(#${gId})" clip-path="url(#${cId})"/>
-</svg><span style="margin-left:8px;font-size:1.1em;">${Math.max(0, percentage).toFixed(1)}%</span>`;
+  <rect width="${W}" height="${H}" rx="${R}" fill="#141414" stroke="#080808" stroke-width="1.5"/>
+  <g clip-path="url(#${cId})">
+    <rect width="${filled}" height="${H}" fill="${color}"/>
+    <rect width="${filled}" height="${H}" fill="url(#${hId})"/>
+  </g>
+</svg><span style="margin-left:9px;font-size:1.1em;">${Math.max(0, percentage).toFixed(1)}%</span>`;
     }
 
     function buildTable(container, headers, rows) {
