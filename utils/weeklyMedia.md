@@ -176,7 +176,7 @@ modified_at: 2026-03-25
         // ── Render ────────────────────────────────────────────────────
         let hasAny = false;
 
-        function renderSection(icon, map, unit, barColor, useSquares) {
+        function renderSection(icon, map, unit, barColor, useSquares, isFinished = () => false, iconHtml = null) {
             const items = [...map.entries()]
                 .map(([name, d]) => {
                     const baseline = (d.weekMin === 1 || d.baseline === null) ? 0 : d.baseline;
@@ -190,19 +190,25 @@ modified_at: 2026-03-25
             const table = wrap.createEl('div', { attr: { style: 'margin:4px 0 8px 0; width:80%;' } });
             for (const item of items) {
                 const row = table.createEl('div', { attr: { style: 'display:flex; align-items:center; gap:8px; margin:2px 0;' } });
-                const label = row.createEl('a', { text: icon + ' ' + item.name, cls: 'internal-link',
-                    attr: { style: 'min-width:120px; flex-shrink:0; cursor:pointer; font-size:.9em;' } });
+                const nameWrap = row.createEl('div', { attr: { style: 'min-width:120px; flex-shrink:0; display:flex; align-items:center; gap:3px;' } });
+                if (iconHtml !== null) {
+                    const iconEl = nameWrap.createEl('span');
+                    iconEl.innerHTML = iconHtml;
+                }
+                const label = nameWrap.createEl('a', { text: (iconHtml !== null ? '' : icon + ' ') + item.name, cls: 'internal-link',
+                    attr: { style: 'cursor:pointer; font-size:.9em;' } });
                 label.addEventListener('click', e => { e.preventDefault(); app.workspace.openLinkText(item.name, activeFile.path); });
+                const finished = isFinished(item.name);
                 if (useSquares) {
                     const squaresWrap = row.createEl('div', { attr: { style: 'display:flex; flex-wrap:wrap; gap:2px; align-items:center;' } });
                     for (let i = 0; i < item.delta; i++) {
                         squaresWrap.createEl('div', { attr: { style: `width:12px; height:12px; background:${barColor}; border-radius:2px;` } });
                     }
-                    squaresWrap.createEl('span', { text: ` +${item.delta} ${unit}`, attr: { style: 'font-size:.85em; color:var(--text-muted); margin-left:4px;' } });
+                    squaresWrap.createEl('span', { text: ` +${item.delta} ${unit}${finished ? ' ✔' : ''}`, attr: { style: 'font-size:.85em; color:var(--text-muted); margin-left:4px;' } });
                 } else {
                     const barAndText = row.createEl('div', { attr: { style: 'display:flex; align-items:center; gap:6px;' } });
                     barAndText.createEl('div', { attr: { style: `width:${Math.round(item.delta / maxDelta * 200)}px; height:10px; background:${barColor}; border-radius:3px; flex-shrink:0;` } });
-                    barAndText.createEl('span', { text: `+${item.delta} ${unit}`, attr: { style: 'font-size:.85em; color:var(--text-muted);' } });
+                    barAndText.createEl('span', { text: `+${item.delta} ${unit}${finished ? ' ✔' : ''}`, attr: { style: 'font-size:.85em; color:var(--text-muted);' } });
                 }
             }
         }
@@ -222,7 +228,14 @@ modified_at: 2026-03-25
             }
         }
 
-        renderSection('📺', shows,   '集', '#A8D8EA', true);
+        // Remove shows tagged 弃剧
+        const abandoned = [...shows.keys()].filter(name => {
+            const p = dv.page(name);
+            return p?.file?.tags?.some(t => t === '#弃剧' || t === '弃剧');
+        });
+        abandoned.forEach(name => shows.delete(name));
+
+        renderSection('📺', shows,   '集', '#A8D8EA', true, name => !!dv.page(name)?.["看过日期"], '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" style="vertical-align:middle;fill:currentColor;margin-right:2px"><rect x="2" y="3" width="20" height="14" rx="2"/><rect x="8" y="17" width="8" height="2"/><rect x="5" y="19" width="14" height="2" rx="1"/></svg>');
         renderSection('📚', books,   '页', '#B5E8C8', false);
         renderSection('🎓', courses, '节', '#F7C5A0', true);
         renderListSection('🎬', movies);

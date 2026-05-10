@@ -57,8 +57,8 @@ modified_at: 2026-04-14
         const indentLevel = p.level - startHeadingLevel;
         const color = pastelColors[index % pastelColors.length];
 
-        // Clean heading for linking (remove ^ used for block references)
-        const cleanHeading = p.heading.replace(/\^+$/g, '').trim();
+        // Clean heading for display and linking (remove block refs and %% comments %%)
+        const cleanHeading = p.heading.replace(/%%.*?%%/g, '').replace(/\^+$/g, '').trim();
 
         // Dot sizes based on heading level
         let dotSize;
@@ -89,7 +89,7 @@ modified_at: 2026-04-14
 
         // Create clickable link using Obsidian's internal API
         const link = row.createEl('a', {
-            text: p.heading,
+            text: cleanHeading,
             cls: 'internal-link',
             attr: { style: 'text-decoration: none; cursor: pointer;' }
         });

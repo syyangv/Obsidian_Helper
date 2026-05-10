@@ -236,9 +236,26 @@ try {
         }
     `;
 
-    // Create title
-    const titleDiv = wrapper.createEl('div', { cls: `${uid}-title` });
-    titleDiv.textContent = CONFIG.title;
+    // Create title with Sims squircle icon (medical cross)
+    const titleRow = wrapper.createEl('div', {
+        attr: { style: 'display:flex; align-items:center; gap:10px; margin-bottom:10px;' }
+    });
+    const iconEl = titleRow.createEl('span', {
+        attr: { style: 'display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:28%;background:linear-gradient(145deg,#3aa4c2,#094a63);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(0,0,0,.3),0 2px 5px rgba(0,0,0,.4);flex-shrink:0;' }
+    });
+    const NS_a = 'http://www.w3.org/2000/svg';
+    const svg_a = document.createElementNS(NS_a, 'svg');
+    svg_a.setAttribute('width', '18'); svg_a.setAttribute('height', '18');
+    svg_a.setAttribute('viewBox', '0 0 18 18'); svg_a.setAttribute('fill', 'white');
+    const crossH = document.createElementNS(NS_a, 'rect');
+    crossH.setAttribute('x', '3'); crossH.setAttribute('y', '7.5');
+    crossH.setAttribute('width', '12'); crossH.setAttribute('height', '3'); crossH.setAttribute('rx', '1');
+    const crossV = document.createElementNS(NS_a, 'rect');
+    crossV.setAttribute('x', '7.5'); crossV.setAttribute('y', '3');
+    crossV.setAttribute('width', '3'); crossV.setAttribute('height', '12'); crossV.setAttribute('rx', '1');
+    svg_a.appendChild(crossH); svg_a.appendChild(crossV); iconEl.appendChild(svg_a);
+    const titleDiv = titleRow.createEl('div', { cls: `${uid}-title`, attr: { style: 'margin-bottom:0;' } });
+    titleDiv.textContent = '过敏科就诊记录';
 
     // Create count display (will be updated when switching years)
     const countDiv = wrapper.createEl('div', { cls: `${uid}-count` });

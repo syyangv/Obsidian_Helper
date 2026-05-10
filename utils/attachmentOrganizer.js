@@ -9,13 +9,15 @@ module.exports = async (params) => {
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mov'];
     const pdfExtension = 'pdf';
 
-    // Media content folders mapping
+    // Media content folders/notes mapping.
+    // source can be a folder path (matches all notes inside) or a note path without .md extension (matches that single note).
     const mediaFolders = [
         { source: "知识库/读书笔记", target: "Attachments/cover/书", types: null },
         { source: "看电视", target: "Attachments/cover/电视剧", types: ["电视剧"] },
         { source: "看电视", target: "Attachments/cover/剧场", types: ["剧场"] },
         { source: "看电视", target: "Attachments/cover/电影", types: ["电影"] },
-        { source: "Hobbies/Musical", target: "Attachments/cover/剧场", types: null }
+        { source: "Hobbies/Musical", target: "Attachments/cover/剧场", types: null },
+        { source: "知识库/编程工具箱/设计", target: "Attachments/设计", types: null }
     ];
 
     // Get all files
@@ -84,7 +86,10 @@ module.exports = async (params) => {
 
     for (const mediaFolder of mediaFolders) {
         const mediaNotes = app.vault.getMarkdownFiles()
-            .filter(file => file.path.startsWith(mediaFolder.source + '/'));
+            .filter(file =>
+                file.path.startsWith(mediaFolder.source + '/') ||
+                file.path === mediaFolder.source + '.md'
+            );
 
         for (const note of mediaNotes) {
             try {
@@ -114,6 +119,7 @@ module.exports = async (params) => {
                             let cleanValue = value.trim();
                             cleanValue = cleanValue.replace(/^["']|["']$/g, ''); // Remove surrounding quotes
                             cleanValue = cleanValue.replace(/^\[\[|\]\]$/g, ''); // Remove wikilink brackets
+                            cleanValue = cleanValue.split('|')[0].trim(); // Strip alias/scaling e.g. |300
 
                             // Check if the value looks like an image file
                             const lowerValue = cleanValue.toLowerCase();
@@ -131,6 +137,7 @@ module.exports = async (params) => {
                                     let cleanItem = item.trim();
                                     cleanItem = cleanItem.replace(/^["']|["']$/g, '');
                                     cleanItem = cleanItem.replace(/^\[\[|\]\]$/g, '');
+                                    cleanItem = cleanItem.split('|')[0].trim(); // Strip alias/scaling e.g. |300
 
                                     const lowerItem = cleanItem.toLowerCase();
                                     if (imageExtensions.some(ext => lowerItem.endsWith('.' + ext))) {
@@ -183,6 +190,66 @@ module.exports = async (params) => {
                 console.warn(`Failed to read note ${note.path}:`, error);
             }
         }
+    }
+
+    // ===== Build comprehensive set of all filenames referenced anywhere in the vault =====
+    const allReferencedFilenames = new Set();
+
+    for (const note of app.vault.getMarkdownFiles()) {
+        try {
+            const content = await app.vault.read(note);
+            const cache = app.metadataCache.getFileCache(note);
+            let match;
+
+            // Wikilinks: [[file]] and ![[file]], with optional alias/heading
+            const wikiRegex = /!?\[\[([^\|\]#]+)(?:[|#][^\]]+)?\]\]/g;
+            while ((match = wikiRegex.exec(content)) !== null) {
+                const ref = match[1].trim();
+                allReferencedFilenames.add(ref.includes('/') ? ref.split('/').pop() : ref);
+            }
+
+            // Markdown images: ![alt](path)
+            const mdImgRegex = /!\[[^\]]*\]\(([^)]+)\)/g;
+            while ((match = mdImgRegex.exec(content)) !== null) {
+                const ref = match[1].trim();
+                allReferencedFilenames.add(ref.includes('/') ? ref.split('/').pop() : ref);
+            }
+
+            // HTML img tags: <img src="...">
+            const htmlImgRegex = /<img[^>]+src=["']?([^"'\s>]+)/gi;
+            while ((match = htmlImgRegex.exec(content)) !== null) {
+                const ref = match[1];
+                allReferencedFilenames.add(ref.includes('/') ? ref.split('/').pop() : ref);
+            }
+
+            // Frontmatter values (covers book/tv cover images stored as properties)
+            if (cache?.frontmatter) {
+                for (const value of Object.values(cache.frontmatter)) {
+                    const vals = Array.isArray(value) ? value : [value];
+                    for (const v of vals) {
+                        if (typeof v === 'string') {
+                            let clean = v.trim().replace(/^["']|["']$/g, '').replace(/^\[\[|\]\]$/g, '');
+                            clean = clean.split('|')[0].trim(); // strip alias/scaling e.g. |300
+                            allReferencedFilenames.add(clean.includes('/') ? clean.split('/').pop() : clean);
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn(`Reference scan failed for ${note.path}:`, e);
+        }
+    }
+
+    // Scan canvas files — nodes with type "file" reference vault files
+    for (const cf of app.vault.getAllLoadedFiles().filter(f => f.extension === 'canvas')) {
+        try {
+            const data = JSON.parse(await app.vault.read(cf));
+            for (const node of data.nodes || []) {
+                if (node.file) {
+                    allReferencedFilenames.add(node.file.includes('/') ? node.file.split('/').pop() : node.file);
+                }
+            }
+        } catch (e) { /* malformed canvas, skip */ }
     }
 
     // Create base folders if they don't exist
@@ -312,6 +379,38 @@ module.exports = async (params) => {
         }
     }
 
+    // ===== Remove any folder notes auto-created inside Attachments =====
+    // Folder Notes plugin may create .md files when folders are created; attachment folders are media-only.
+    for (const note of app.vault.getMarkdownFiles().filter(f => f.path.startsWith(imageFolder + '/'))) {
+        try {
+            console.log(`Removing folder note from attachments: ${note.path}`);
+            await app.vault.trash(note, true);
+        } catch (e) {
+            console.error(`Failed to remove folder note ${note.path}:`, e);
+        }
+    }
+
+    // ===== Trash unreferenced attachments =====
+    // Run after all moves so files are in their final locations
+    const attachmentExtensions = new Set([...imageExtensions, pdfExtension]);
+    const unreferencedFiles = app.vault.getAllLoadedFiles().filter(f =>
+        f.extension &&
+        f.path.startsWith(imageFolder + '/') &&
+        attachmentExtensions.has(f.extension.toLowerCase()) &&
+        !allReferencedFilenames.has(f.name)
+    );
+
+    let deletedCount = 0;
+    for (const file of unreferencedFiles) {
+        try {
+            console.log(`Trashing unreferenced attachment: ${file.path}`);
+            await app.vault.trash(file, true);
+            deletedCount++;
+        } catch (e) {
+            console.error(`Failed to trash ${file.path}:`, e);
+        }
+    }
+
     // Show notification
-    new Notice(`Moved ${movedImageCount} general images, ${movedDiaryImageCount} diary images, ${movedMediaImageCount} media covers, and ${movedPdfCount} PDFs`);
+    new Notice(`Moved ${movedImageCount} general images, ${movedDiaryImageCount} diary images, ${movedMediaImageCount} media covers, and ${movedPdfCount} PDFs\nTrashed ${deletedCount} unreferenced attachments`);
 };

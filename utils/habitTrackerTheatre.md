@@ -218,9 +218,12 @@ try {
         }
     `;
 
-    // Create title
-    const titleDiv = wrapper.createEl('div', { cls: `${uid}-title` });
-    titleDiv.textContent = CONFIG.title;
+    // Create title with Sims squircle icon (star — magenta)
+    const titleRow = wrapper.createEl('div', { attr: { style: 'display:flex;align-items:center;gap:10px;margin-bottom:10px;' } });
+    const iconEl = titleRow.createEl('span', { attr: { style: 'display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:28%;background:linear-gradient(145deg,#e060a0,#801050);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(0,0,0,.3),0 2px 5px rgba(0,0,0,.4);flex-shrink:0;' } });
+    iconEl.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.1,8.5 22,9.5 17,14.3 18.2,21 12,17.8 5.8,21 7,14.3 2,9.5 8.9,8.5"/></svg>`;
+    const titleDiv = titleRow.createEl('div', { cls: `${uid}-title`, attr: { style: 'margin-bottom:0;' } });
+    titleDiv.textContent = '看戏记录';
 
     // Create count display (will be updated when switching years)
     const countDiv = wrapper.createEl('div', { cls: `${uid}-count` });

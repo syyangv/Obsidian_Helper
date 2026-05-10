@@ -18,10 +18,8 @@ modified_at: 2026-03-31
 - [ ] #Project/日常任务 用 [[United Quest]] MileagePlus X app 买$15 ubereats giftcard (for $8 credit) 🛫 <% tp.file.title %>-01 📅 <% tp.file.title %>-15
  Using the theme: `INPUT[suggester(option(moonrise), option(budapest), option(asteroid), option(darjeeling)):theme]`
 
-```anyblock
-[fold]
+# 本月金额汇总 %% fold %%
 **🛍️本月[[购物]]:** `VIEW[{购物金额}]` **🍜本月吃饭:** `VIEW[{食物金额}]` **⚡️本月电费:** `VIEW[{电费}]`
-```
 
 ```meta-bind-button
 style: default
@@ -33,14 +31,14 @@ actions:
 # 本月主题^
 <font color="#92d050">**<center><span style="font-size: 20px;">🎯 </span></center>**</font></font>
 
-# 1 BUJO
+# BUJO
 [[2026Q1#2026年1月 事件Planning]]
 
 ![[monthlyCalendarGrid]]
-# 2 其他统计
+# 其他统计
 ![[monthlyStats]]
 
-# 3 Events
+# Events
 ![[monthlyEvents]]
-# 4 本月书影音
+# 本月书影音
 ![[月度书影音.base]]

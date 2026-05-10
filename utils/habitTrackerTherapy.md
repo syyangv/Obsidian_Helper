@@ -261,9 +261,12 @@ try {
         }
     `;
 
-    // Create title
-    const titleDiv = wrapper.createEl('div', { cls: `${uid}-title` });
-    titleDiv.textContent = CONFIG.title;
+    // Create title with Sims squircle icon (speech bubble — rose)
+    const titleRow = wrapper.createEl('div', { attr: { style: 'display:flex;align-items:center;gap:10px;margin-bottom:10px;' } });
+    const iconEl = titleRow.createEl('span', { attr: { style: 'display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:28%;background:linear-gradient(145deg,#ff6090,#a02040);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(0,0,0,.3),0 2px 5px rgba(0,0,0,.4);flex-shrink:0;' } });
+    iconEl.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4Q4 2 6 2L18 2Q20 2 20 4L20 13Q20 15 18 15L13.5 15L11 18.5L11 15L6 15Q4 15 4 13Z"/><line x1="7.5" y1="7" x2="16.5" y2="7"/><line x1="7.5" y1="10.5" x2="13.5" y2="10.5"/></svg>`;
+    const titleDiv = titleRow.createEl('div', { cls: `${uid}-title`, attr: { style: 'margin-bottom:0;' } });
+    titleDiv.textContent = '治疗记录';
 
     // Cache status and refresh button
     const cacheBar = wrapper.createEl('div', {

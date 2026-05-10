@@ -365,9 +365,12 @@ try {
         }
     `;
 
-    // Create title
-    const titleDiv = wrapper.createEl('div', { cls: `${uid}-title` });
-    titleDiv.textContent = CONFIG.title;
+    // Create title with Sims squircle icon (pot — coral)
+    const titleRow = wrapper.createEl('div', { attr: { style: 'display:flex;align-items:center;gap:10px;margin-bottom:10px;' } });
+    const iconEl = titleRow.createEl('span', { attr: { style: 'display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:28%;background:linear-gradient(145deg,#ff7060,#902010);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(0,0,0,.3),0 2px 5px rgba(0,0,0,.4);flex-shrink:0;' } });
+    iconEl.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3L6 10Q6 13 12 13Q18 13 18 10L18 3"/><line x1="12" y1="13" x2="12" y2="20"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="9" y1="3" x2="9" y2="8"/><line x1="12" y1="3" x2="12" y2="8"/><line x1="15" y1="3" x2="15" y2="8"/></svg>`;
+    const titleDiv = titleRow.createEl('div', { cls: `${uid}-title`, attr: { style: 'margin-bottom:0;' } });
+    titleDiv.textContent = '下厨记录';
 
     // Cache status and refresh button
     const cacheBar = wrapper.createEl('div', {

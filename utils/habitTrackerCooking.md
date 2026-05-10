@@ -294,9 +294,12 @@ try {
         }
     `;
 
-    // Create title
-    const titleDiv = wrapper.createEl('div', { cls: `${uid}-title` });
-    titleDiv.textContent = CONFIG.title;
+    // Create title with Sims squircle icon (flame — amber)
+    const titleRow = wrapper.createEl('div', { attr: { style: 'display:flex;align-items:center;gap:10px;margin-bottom:10px;' } });
+    const iconEl = titleRow.createEl('span', { attr: { style: 'display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:28%;background:linear-gradient(145deg,#e89040,#804010);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(0,0,0,.3),0 2px 5px rgba(0,0,0,.4);flex-shrink:0;' } });
+    iconEl.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3Q10 6 12 9Q14 12 12 15"/><path d="M7 5Q5 8 7 11Q9 14 7 17"/><path d="M17 5Q15 8 17 11Q19 14 17 17"/><line x1="4" y1="20" x2="20" y2="20"/></svg>`;
+    const titleDiv = titleRow.createEl('div', { cls: `${uid}-title`, attr: { style: 'margin-bottom:0;' } });
+    titleDiv.textContent = '食谱记录';
 
     // Cache status and refresh button
     const cacheBar = wrapper.createEl('div', {

@@ -52,17 +52,40 @@ modified_at: 2026-03-14
             parent.createEl('span', { text: '·', attr: { style: `color:${P.muted};` } });
         }
 
-        // Row: ← prev month · year · next month →
+        function simNavBtn(parent, svgPoints, clickFn) {
+            const btn = parent.createEl('span', {
+                attr: { style: 'display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:28%;background:linear-gradient(145deg,#3aa4c2,#094a63);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(0,0,0,.3),0 2px 5px rgba(0,0,0,.4);cursor:pointer;flex-shrink:0;' }
+            });
+            const NS = 'http://www.w3.org/2000/svg';
+            const svg = document.createElementNS(NS, 'svg');
+            svg.setAttribute('width', '14'); svg.setAttribute('height', '14');
+            svg.setAttribute('viewBox', '0 0 18 18'); svg.setAttribute('fill', 'none');
+            svg.setAttribute('stroke', 'white'); svg.setAttribute('stroke-width', '2.2');
+            svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
+            const pl = document.createElementNS(NS, 'polyline');
+            pl.setAttribute('points', svgPoints);
+            svg.appendChild(pl); btn.appendChild(svg);
+            btn.addEventListener('click', clickFn);
+            return btn;
+        }
+
+        // Row: [←] prev month · year · next month [→]
         const navRow = wrap.createEl('div', {
             attr: { style: 'display:flex; gap:8px; align-items:center; justify-content:center;' }
         });
-        pill(navRow, '←', `年度记录/${prevYear}/月计划/${prevMonthString}`, past);
+        simNavBtn(navRow, '11,4 6,9 11,14', e => {
+            e.preventDefault();
+            app.workspace.openLinkText(`年度记录/${prevYear}/月计划/${prevMonthString}`, activeFile.path);
+        });
         navRow.createEl('span', { text: prevMonthString, attr: { style: `color:${P.muted};` } });
         sep(navRow);
         pill(navRow, `${currentYear}年`, `年度记录/${currentYear}/${currentYear}`, current);
         sep(navRow);
         navRow.createEl('span', { text: nextMonthString, attr: { style: `color:${P.muted};` } });
-        pill(navRow, '→', `年度记录/${nextYear}/月计划/${nextMonthString}`, future);
+        simNavBtn(navRow, '7,4 12,9 7,14', e => {
+            e.preventDefault();
+            app.workspace.openLinkText(`年度记录/${nextYear}/月计划/${nextMonthString}`, activeFile.path);
+        });
 
     } catch (err) {
         dv.paragraph('⚠️ ' + err.message);

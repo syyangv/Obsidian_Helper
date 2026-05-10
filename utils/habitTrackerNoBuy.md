@@ -272,7 +272,11 @@ try {
     // ========================================
     // 显示标题和进度
     // ========================================
-    dv.span(`**${CONFIG.title}**`);
+    // Title with Sims squircle icon (lock — gold)
+    const titleRow = dv.container.createEl('div', { attr: { style: 'display:flex;align-items:center;gap:10px;margin-bottom:10px;' } });
+    const iconEl = titleRow.createEl('span', { attr: { style: 'display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:28%;background:linear-gradient(145deg,#f4c842,#8a6010);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(0,0,0,.3),0 2px 5px rgba(0,0,0,.4);flex-shrink:0;' } });
+    iconEl.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11L8 7Q8 3 12 3Q16 3 16 7L16 11"/><circle cx="12" cy="16" r="1.5" fill="white" stroke="none"/></svg>`;
+    titleRow.createEl('strong', { text: '100天不买挑战', attr: { style: 'font-size:1.2em;' } });
     dv.span(`<br>📅 开始: ${CONFIG.startDate}`);
     
     if (missedCount > 0) {

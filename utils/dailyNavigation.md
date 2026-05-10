@@ -98,11 +98,40 @@ modified_at: 2026-03-29
             parent.createEl('span', { text: '·', attr: { style: `color:${P.muted};` } });
         }
 
-        // Row 1: ← prev date · year · month · next date →
+        // Sims-style squircle icon button
+        function simNavBtn(parent, svgPoints, clickFn) {
+            const btn = parent.createEl('span', {
+                attr: { style: 'display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:28%;background:linear-gradient(145deg,#3aa4c2,#094a63);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(0,0,0,.3),0 2px 5px rgba(0,0,0,.4);cursor:pointer;flex-shrink:0;' }
+            });
+            const NS = 'http://www.w3.org/2000/svg';
+            const svg = document.createElementNS(NS, 'svg');
+            svg.setAttribute('width', '14'); svg.setAttribute('height', '14');
+            svg.setAttribute('viewBox', '0 0 18 18'); svg.setAttribute('fill', 'none');
+            svg.setAttribute('stroke', 'white'); svg.setAttribute('stroke-width', '2.2');
+            svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
+            const pl = document.createElementNS(NS, 'polyline');
+            pl.setAttribute('points', svgPoints);
+            svg.appendChild(pl);
+            btn.appendChild(svg);
+            btn.addEventListener('click', clickFn);
+            return btn;
+        }
+
+        // Row 1: [←] prev date · year · month · next date [→]
         const navRow = wrap.createEl('div', {
             attr: { style: 'display:flex; gap:8px; align-items:center; justify-content:center;' }
         });
-        datePill(navRow, '←', `日记/${prevYear}/${previousDateString}`, previousDateString, prevYear, past);
+
+        simNavBtn(navRow, '11,4 6,9 11,14', async e => {
+            e.preventDefault();
+            const fullPath = `日记/${prevYear}/${previousDateString}.md`;
+            if (!app.vault.getAbstractFileByPath(fullPath)) {
+                const qapi = app.plugins.plugins['quickadd']?.api;
+                if (qapi) { await qapi.executeChoice('createDailyNoteByDate', { date: previousDateString }); return; }
+            }
+            app.workspace.openLinkText(`日记/${prevYear}/${previousDateString}`, activeFile.path);
+        });
+
         navRow.createEl('span', { text: previousDateString, attr: { style: `color:${P.muted};` } });
         sep(navRow);
         pill(navRow, `${currentYear}年`, `年度记录/${currentYear}/${currentYear}`, current);
@@ -110,7 +139,16 @@ modified_at: 2026-03-29
         pill(navRow, `${monthNumber}月`, `年度记录/${currentYear}/月计划/${monthString}`, current);
         sep(navRow);
         navRow.createEl('span', { text: nextDateString, attr: { style: `color:${P.muted};` } });
-        datePill(navRow, '→', `日记/${nextYear}/${nextDateString}`, nextDateString, nextYear, future);
+
+        simNavBtn(navRow, '7,4 12,9 7,14', async e => {
+            e.preventDefault();
+            const fullPath = `日记/${nextYear}/${nextDateString}.md`;
+            if (!app.vault.getAbstractFileByPath(fullPath)) {
+                const qapi = app.plugins.plugins['quickadd']?.api;
+                if (qapi) { await qapi.executeChoice('createDailyNoteByDate', { date: nextDateString }); return; }
+            }
+            app.workspace.openLinkText(`日记/${nextYear}/${nextDateString}`, activeFile.path);
+        });
 
         // Row 2: weekly note link
         if (weekPage) {

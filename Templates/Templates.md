@@ -1,7 +1,6 @@
 ---
  tags: []
- cssclasses:
-  - hide-frontmatter
+ cssclasses:  hide-frontmatter
 modified_at: 2026-01-27
 ---
 ![[noteNav]]
