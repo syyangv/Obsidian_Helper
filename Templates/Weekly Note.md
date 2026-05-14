@@ -13,7 +13,65 @@ modified_at: 2026-03-22
 
 [[信息intake]]
 ![[genTOC]]
+![[Helper/utils/taskAgeBadges]]
 # 1 Tasks
+## 1.1 Upcoming
+````columns
+id: upcoming-<% tp.file.title %>
+
+===
+### Regular
+```tasks
+not done
+filter by function task.status.symbol !== '>'
+path does not include 播客
+path does not include 周计划
+path does not include Logistics/库存/Pantry
+happens after <% window.moment(tp.file.title, "GGGG-[W]WW").day(0).subtract(1, 'day').format("YYYY-MM-DD") %>
+happens before <% window.moment(tp.file.title, "GGGG-[W]WW").day(6).add(1, 'day').format("YYYY-MM-DD") %>
+sort by due
+```
+
+===
+### Pantry older than 3 days
+```tasks
+not done
+filter by function task.status.symbol !== '>'
+path includes Logistics/库存/Pantry
+filter by function ['冰箱', '冷藏', '水果', '冷藏饮料', '冷冻', '冷冻肉&海鲜', '冷冻蔬果', '冷冻主食&点心', '冷冻甜品'].some(h => (task.heading ?? task.precedingHeader ?? '').includes(h))
+created before 3 days ago
+sort by function task.heading ?? task.precedingHeader ?? ''
+sort by created
+hide backlink
+```
+
+````
+
+## 1.2 Done this week
+````columns
+id: done-this-week-<% tp.file.title %>
+
+===
+### Regular
+```tasks
+done after <% window.moment(tp.file.title, "GGGG-[W]WW").day(0).subtract(1, 'day').format("YYYY-MM-DD") %>
+done before <% window.moment(tp.file.title, "GGGG-[W]WW").day(6).add(1, 'day').format("YYYY-MM-DD") %>
+path does not include 播客
+path does not include 周计划
+path does not include Logistics/库存/Pantry
+```
+
+===
+### Pantry
+```tasks
+done after <% window.moment(tp.file.title, "GGGG-[W]WW").day(0).subtract(1, 'day').format("YYYY-MM-DD") %>
+done before <% window.moment(tp.file.title, "GGGG-[W]WW").day(6).add(1, 'day').format("YYYY-MM-DD") %>
+path includes Logistics/库存/Pantry
+hide backlink
+```
+
+````
+
 # 2 信息feed
 ## 2.1 本周更新
 ```dataviewjs

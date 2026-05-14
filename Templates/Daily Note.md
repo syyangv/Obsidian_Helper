@@ -30,7 +30,10 @@ modified_at: 2026-04-08
 ![[dayOfWeek|no-title]]
 ![[dailyNavigation]]
 ![[genTOC]]
-`BUTTON[add_task]` `BUTTON[addRefill]` `BUTTON[edit_体重]` `BUTTON[edit_起起体重]` `BUTTON[therapy]` `BUTTON[swimming]` `BUTTON[qa_tv]` `BUTTON[qa_book]`
+![[Helper/utils/dayMentions]]
+`BUTTON[add_task]` `BUTTON[addRefill]` `BUTTON[edit_体重]` `BUTTON[edit_起起体重]` `BUTTON[therapy]` `BUTTON[swimming]` 
+
+`BUTTON[qa_tv]` `BUTTON[qa_book]`
 
 ![[importantDates]]
 
@@ -64,45 +67,55 @@ modified_at: 2026-04-08
 
 **🚿 浴室清洁：**`INPUT[inlineListSuggester(option(刷马桶), option(洗手台), option(浴室地面), option(替换/牙刷刷头)):hw_bathroom]`
 
-**🔪 厨房清洁：**`INPUT[inlineListSuggester(option(厨房水池), option(整理/厨房台面), option(整理/冷藏), option(整理/冷冻)):hw_kitchen]`
+**🔪 厨房清洁：**`INPUT[inlineListSuggester(option(厨房水池), option(整理/厨房台面), option(整理/冷藏), option(整理/冷冻), option(微波炉), option(灶台)):hw_kitchen]`
 
 **:DoFullTrash:替换：**`INPUT[inlineListSuggester(option(替换/猫砂盆liner), option(替换/空调滤网), option(替换/空气净化器filter)):hw_renew]`
 
-# 笔记 %% fold %%
+# 笔记
+
+````columns
+id: <%* tR += Math.random().toString(36).slice(2, 9) %>
+
+===
 
 ![[dailyModify.base|ordered-list]]
 
-<%*
-const moment = window.moment;
-const baseDate = moment(tp.file.title, "YYYY-MM-DD");
+===
 
-const startDate = baseDate.clone().subtract(1, 'days').format("YYYY-MM-DD");
-const endDate = baseDate.clone().add(7, 'days').format("YYYY-MM-DD");
-
-tR +="```tasks\n";
-tR += "not done\n";
-tR += "filter by function task.status.symbol !== '>'\n";
-tR += "path does not include 播客\n";
-tR += "path does not include 周计划\n";
-tR += `happens after ${startDate}\n`;
-tR += `happens before ${endDate}\n`;
-tR += "sort by due\n";
-tR += "```\n";
-
-tR +="```tasks\n";
-tR += `done ${baseDate}\n`;
-tR += "path does not include 播客\n";
-tR += "path does not include 周计划\n";
-tR += "```\n";
-%>
 ![[日常工具-20250901.base#即将到期订阅]]
 
+````
+
 # Event
+
+```columns
+id: event-cols
+
+===
+
+![[eventNotes]]
+
+
+===
+
+
+
+```
+
+```columns
+id: radsagg
+
+===
 ## 课程
+
 `BUTTON[updateCourse]`
 
+===
 ## 看电视
 `BUTTON[addShow]`
 
+===
 ## 读书
 `BUTTON[addBook]`
+
+```
