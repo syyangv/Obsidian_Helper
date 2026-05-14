@@ -58,41 +58,36 @@ module.exports = async (params) => {
         new Notice("请先打开一个笔记");
         return;
     }
-    
+
     var content = await app.vault.read(file);
     var newEntry = "- [[" + selected + "]] 看过集数:: " + episodes;
-    
-    const cache = app.metadataCache.getFileCache(file);
-    const headings = (cache && cache.headings) || [];
-    
-    // Find the heading that ends with 看电视
-    var targetHeading = null;
-    for (var i = 0; i < headings.length; i++) {
-        var h = headings[i];
-        if (h.level === 2 && h.heading.endsWith("看电视")) {
-            targetHeading = h;
+    var lines = content.split("\n");
+
+    // Find 看电视 section by raw text search — works for both normal headings
+    // and headings inside columns code blocks (which cache.headings won't index)
+    var startLine = -1;
+    for (var i = 0; i < lines.length; i++) {
+        if (/^##\s.*看电视/.test(lines[i])) {
+            startLine = i;
             break;
         }
     }
-    
-    if (!targetHeading) {
+
+    if (startLine === -1) {
         new Notice("没有找到看电视标题");
         return;
     }
-    
-    var lines = content.split("\n");
-    var startLine = targetHeading.position.start.line;
-    
-    // Find the end of this section
+
+    // Section ends at next === (columns separator), closing ```, or ## heading
     var endLine = lines.length;
-    for (var j = 0; j < headings.length; j++) {
-        var heading = headings[j];
-        if (heading.position.start.line > startLine && heading.level <= 2) {
-            endLine = heading.position.start.line;
+    for (var j = startLine + 1; j < lines.length; j++) {
+        var trimmed = lines[j].trim();
+        if (trimmed === '===' || trimmed === '```' || /^#{1,2} /.test(lines[j])) {
+            endLine = j;
             break;
         }
     }
-    
+
     // Check if this show already exists in this section
     var existingLineIndex = -1;
     var searchStr = "- [[" + selected + "]] 看过集数:: ";
@@ -102,7 +97,7 @@ module.exports = async (params) => {
             break;
         }
     }
-    
+
     if (existingLineIndex !== -1) {
         lines[existingLineIndex] = newEntry;
         await app.vault.modify(file, lines.join("\n"));

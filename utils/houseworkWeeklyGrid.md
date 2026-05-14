@@ -75,6 +75,8 @@ const GROUPS = [
             { key: '整理/厨房台面', fm: 'hw_kitchen', fmVals: ['整理/厨房台面'], label: '🧹 厨房台面' },
             { key: '整理/冷藏',     fm: 'hw_kitchen', fmVals: ['整理/冷藏'],     label: '🥬 冷藏'     },
             { key: '整理/冷冻',     fm: 'hw_kitchen', fmVals: ['整理/冷冻'],     label: '🧊 冷冻'     },
+            { key: '微波炉',        fm: 'hw_kitchen', fmVals: ['微波炉'],         label: '📡 微波炉'   },
+            { key: '灶台',          fm: 'hw_kitchen', fmVals: ['灶台'],           label: '🔥 灶台'     },
         ]
     },
     {
@@ -100,6 +102,7 @@ const INTERVALS = {
     '整理/卖Mercari': 90,
     '刷马桶': 21, '洗手台': 45, '浴室地面': 90, '替换/牙刷刷头': 90,
     '厨房水池': 45, '整理/厨房台面': 30, '整理/冷藏': 90, '整理/冷冻': 180,
+    '微波炉': 90, '灶台': 90,
     '替换/猫砂盆liner': 90, '替换/空调滤网': 90, '替换/空气净化器filter': 180
 };
 

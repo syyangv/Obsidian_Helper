@@ -142,6 +142,9 @@ try {
         let eventItems = [];
         let headingLevel = 0;
         let allImages = [];
+        let inCodeBlock = false;
+        let inColumnsBlock = false;
+        let codeFence = '';
 
         for (let line of lines) {
             const eventHeadingMatch = line.match(/^(#+)\s*(\d+\.?)?\s*(事件|Event)\s*$/i);
@@ -149,18 +152,55 @@ try {
             if (eventHeadingMatch) {
                 inEventSection = true;
                 headingLevel = eventHeadingMatch[1].length;
+                inCodeBlock = false;
+                codeFence = '';
                 continue;
             }
 
-            if (inEventSection && line.match(/^#+\s+/)) {
+            if (inEventSection && !inCodeBlock && line.match(/^#+\s+/)) {
                 break;
             }
 
-            if (inEventSection && line.trim() !== '') {
-                const cleaned = line.replace(/^[\s\-\*\+]+/, '').trim();
-                if (cleaned) {
-                    allImages.push(...extractAllImages(cleaned));
-                    eventItems.push(cleaned);
+            if (inEventSection) {
+                // Track fenced code blocks
+                // columns blocks: read content (skip structural lines)
+                // all other code blocks: skip entirely
+                const fenceMatch = line.trim().match(/^(`{3,})(.*)/);
+                if (fenceMatch) {
+                    if (!inCodeBlock && !inColumnsBlock) {
+                        const lang = fenceMatch[2].trim();
+                        if (lang === 'columns') {
+                            inColumnsBlock = true;
+                        } else {
+                            inCodeBlock = true;
+                        }
+                        codeFence = fenceMatch[1];
+                    } else if (line.trim().startsWith(codeFence)) {
+                        inCodeBlock = false;
+                        inColumnsBlock = false;
+                        codeFence = '';
+                    }
+                    continue;
+                }
+
+                if (inCodeBlock) continue;
+
+                // In columns blocks: skip structural lines, pass text/images through
+                if (inColumnsBlock) {
+                    if (line.trim() === '===' || /^id:\s/.test(line.trim()) || /`BUTTON\[/.test(line) || /^#+\s/.test(line)) continue;
+                }
+
+                // Skip %% comment markers (text between them is still collected)
+                if (line.trim() === '%%') continue;
+                // Skip non-image embeds (widget refs like ![[eventNotes]]) but pass image embeds through
+                if (/^!\[\[/.test(line.trim()) && !/!\[\[[^\]]*\.(jpg|jpeg|png|gif|webp|svg|bmp|tiff?)(\|[^\]]+)?\]\]/i.test(line)) continue;
+
+                if (line.trim() !== '') {
+                    const cleaned = line.replace(/^[\s\-\*\+]+/, '').trim();
+                    if (cleaned) {
+                        allImages.push(...extractAllImages(cleaned));
+                        eventItems.push(cleaned);
+                    }
                 }
             }
         }

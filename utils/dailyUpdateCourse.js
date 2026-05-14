@@ -59,32 +59,29 @@ module.exports = async (params) => {
 
     var content = await app.vault.read(dailyFile);
     var newEntry = "- [[" + selected + "]] 进度:: " + progressNum;
+    var lines = content.split("\n");
 
-    const cache = app.metadataCache.getFileCache(dailyFile);
-    const headings = (cache && cache.headings) || [];
-
-    // Find heading that ends with 课程
-    var targetHeading = null;
-    for (var i = 0; i < headings.length; i++) {
-        if (headings[i].heading.endsWith("课程")) {
-            targetHeading = headings[i];
+    // Find 课程 section by raw text search — works for both normal headings
+    // and headings inside columns code blocks (which cache.headings won't index)
+    var startLine = -1;
+    for (var i = 0; i < lines.length; i++) {
+        if (/^##\s.*课程/.test(lines[i])) {
+            startLine = i;
             break;
         }
     }
 
-    if (!targetHeading) {
+    if (startLine === -1) {
         new Notice("✅ 已更新课程进度，但日记中没有找到课程标题");
         return;
     }
 
-    var lines = content.split("\n");
-    var startLine = targetHeading.position.start.line;
-
-    // Find end of this section (next heading of same or higher level)
+    // Section ends at next === (columns separator), closing ```, or ## heading
     var endLine = lines.length;
-    for (var j = 0; j < headings.length; j++) {
-        if (headings[j].position.start.line > startLine && headings[j].level <= targetHeading.level) {
-            endLine = headings[j].position.start.line;
+    for (var j = startLine + 1; j < lines.length; j++) {
+        var trimmed = lines[j].trim();
+        if (trimmed === '===' || trimmed === '```' || /^#{1,2} /.test(lines[j])) {
+            endLine = j;
             break;
         }
     }

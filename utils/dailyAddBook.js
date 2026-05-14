@@ -43,22 +43,50 @@ module.exports = async (params) => {
     }
     
     let content = await app.vault.read(file);
-    
-    // Check if this book already exists in today's note
-    const bookPattern = new RegExp(`^- \\[\\[${selected.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\]\\] 完成页数:: \\d+$`, 'gm');
-    const existingMatch = content.match(bookPattern);
-    
     const newEntry = `- [[${selected}]] 完成页数:: ${pages}`;
-    
-    if (existingMatch) {
-        // Overwrite existing entry
-        content = content.replace(bookPattern, newEntry);
-        await app.vault.modify(file, content);
+    let lines = content.split("\n");
+
+    // Check if this book already exists anywhere in the note — replace in-place
+    const searchStr = `- [[${selected}]] 完成页数:: `;
+    const existingLineIndex = lines.findIndex(l => l.startsWith(searchStr));
+
+    if (existingLineIndex !== -1) {
+        lines[existingLineIndex] = newEntry;
+        await app.vault.modify(file, lines.join("\n"));
         new Notice(`✏️ 已更新: ${selected} - ${pages}页`);
-    } else {
-        // Add new entry
-        const newContent = content + `\n${newEntry}`;
-        await app.vault.modify(file, newContent);
-        new Notice(`✅ 已添加: ${selected} - ${pages}页`);
+        return;
     }
+
+    // Find 读书 section by raw text search — works for both normal headings
+    // and headings inside columns code blocks (which cache.headings won't index)
+    let startLine = -1;
+    for (let i = 0; i < lines.length; i++) {
+        if (/^##\s.*读书/.test(lines[i])) {
+            startLine = i;
+            break;
+        }
+    }
+
+    if (startLine === -1) {
+        // Fallback: append to end of file
+        lines.push(newEntry);
+        await app.vault.modify(file, lines.join("\n"));
+        new Notice(`✅ 已添加: ${selected} - ${pages}页`);
+        return;
+    }
+
+    // Section ends at next === (columns separator), closing ```, or ## heading
+    let endLine = lines.length;
+    for (let j = startLine + 1; j < lines.length; j++) {
+        const trimmed = lines[j].trim();
+        if (trimmed === '===' || trimmed === '```' || /^#{1,2} /.test(lines[j])) {
+            endLine = j;
+            break;
+        }
+    }
+
+    // Insert new entry before section end
+    lines.splice(endLine, 0, newEntry);
+    await app.vault.modify(file, lines.join("\n"));
+    new Notice(`✅ 已添加: ${selected} - ${pages}页`);
 };

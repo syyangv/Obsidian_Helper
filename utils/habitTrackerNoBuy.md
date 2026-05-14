@@ -1,5 +1,7 @@
 ---
 modified_at: 2026-03-03
+cssclasses:
+  - no-embed-padding
 ---
 
 
@@ -55,24 +57,39 @@ try {
         }
     };
 
-    // ========================================
-    // 注入 CSS 使方块变成正方形
-    // ========================================
-    const styleId = 'heatmap-square-fix';
-    if (!document.getElementById(styleId)) {
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
-            .heatmap-calendar-graph rect.day {
-                width: 10px !important;
-                height: 10px !important;
-            }
-            .heatmap-calendar-graph {
-                --cell-size: 10px;
-            }
-        `;
-        document.head.appendChild(style);
-    }
+    // Plugin renders <ul class="heatmap-calendar-boxes"><li> — NOT SVG rects.
+    // Fix: gap creates column margins; width:100% fills note width; aspect-ratio squares cells.
+    const staleStyle = document.getElementById('heatmap-square-fix');
+    if (staleStyle) staleStyle.remove();
+    const fixStyle = document.createElement('style');
+    fixStyle.id = 'heatmap-square-fix';
+    fixStyle.textContent = `
+        .heatmap-calendar-graph {
+            width: 100% !important;
+            grid-template-columns: auto 1fr !important;
+            margin-top: 0 !important;
+            margin-bottom: 3px !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+        /* Also collapse any gap left by the hidden months row in 2nd+ calendars */
+        .heatmap-calendar-graph ~ .heatmap-calendar-graph {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+        .heatmap-calendar-boxes {
+            display: grid !important;
+            grid-template-columns: repeat(54, 1fr) !important;
+            row-gap: 1.5px !important;
+            column-gap: 1.5px !important;
+        }
+        .heatmap-calendar-boxes li { aspect-ratio: 1 !important; border-radius: 2px !important; }
+        /* Hide month labels on 2nd+ year calendars */
+        .heatmap-calendar-graph ~ .heatmap-calendar-graph .heatmap-calendar-months { display: none !important; }
+    `;
+    document.head.appendChild(fixStyle);
+
+    const fixAndZoom = () => {}; // no-op — CSS handles everything
 
     // ========================================
     // 安全工具函数 Safe Utility Functions
@@ -256,6 +273,11 @@ try {
         }
     }
 
+    // Per-year breakdown
+    const yearStats = {};
+    for (const d of completedDates) { const y = d.slice(0,4); if (!yearStats[y]) yearStats[y]={c:0,m:0}; yearStats[y].c++; }
+    for (const d of missedDates)    { const y = d.slice(0,4); if (!yearStats[y]) yearStats[y]={c:0,m:0}; yearStats[y].m++; }
+
     // ========================================
     // 计算动态结束日期
     // ========================================
@@ -277,43 +299,52 @@ try {
     const iconEl = titleRow.createEl('span', { attr: { style: 'display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:28%;background:linear-gradient(145deg,#f4c842,#8a6010);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(0,0,0,.3),0 2px 5px rgba(0,0,0,.4);flex-shrink:0;' } });
     iconEl.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11L8 7Q8 3 12 3Q16 3 16 7L16 11"/><circle cx="12" cy="16" r="1.5" fill="white" stroke="none"/></svg>`;
     titleRow.createEl('strong', { text: '100天不买挑战', attr: { style: 'font-size:1.2em;' } });
-    dv.span(`<br>📅 开始: ${CONFIG.startDate}`);
-    
-    if (missedCount > 0) {
-        dv.span(`<br>⏳ 原目标: ${CONFIG.baseDaysToTrack}天 → 现目标: <span style="color: #e74c3c; font-weight: bold;">${totalDaysNeeded}天</span> (+${missedCount}天)`);
-    } else {
-        dv.span(`<br>🎯 目标: ${CONFIG.baseDaysToTrack}天`);
+    titleRow.createEl('span', { attr: { style: 'flex:1;' } }); // spacer
+    if (cachedAt) {
+        const ageMinutes = Math.round((Date.now() - cachedAt.getTime()) / 60000);
+        const ageText = ageMinutes < 60 ? `${ageMinutes}分钟前` : `${Math.round(ageMinutes / 60)}小时前`;
+        titleRow.createEl('span', { text: `📦 ${ageText}`, attr: { style: 'font-size:0.8em;color:var(--text-muted);' } });
     }
-    
-    dv.span(`<br>📆 预计结束: ${formatDate(endDate) || 'N/A'}`);
+    const refreshBtn = titleRow.createEl('button', { text: '↺ 刷新' });
+    refreshBtn.style.cssText = 'padding:2px 8px;border-radius:4px;cursor:pointer;border:1px solid var(--background-modifier-border);background:var(--background-secondary);color:var(--text-normal);font-size:0.8em;';
+    refreshBtn.addEventListener('click', async () => {
+        clearCache();
+        const file = app.workspace.getActiveFile();
+        await app.workspace.activeLeaf.openFile(file, { active: true });
+    });
+    // Meta row: start · target · end — all on one line
+    const metaRow = dv.container.createEl('div', { attr: { style: 'display:flex;flex-wrap:wrap;gap:6px 16px;font-size:0.9em;margin:4px 0 6px;color:var(--text-muted);' } });
+    metaRow.createEl('span', { text: `📅 开始: ${CONFIG.startDate}` });
+    if (missedCount > 0) {
+        const targetSpan = metaRow.createEl('span');
+        targetSpan.innerHTML = `⏳ 目标: ${CONFIG.baseDaysToTrack}天 → <span style="color:#e74c3c;font-weight:bold;">${totalDaysNeeded}天</span> (+${missedCount})`;
+    } else {
+        metaRow.createEl('span', { text: `🎯 目标: ${CONFIG.baseDaysToTrack}天` });
+    }
+    metaRow.createEl('span', { text: `📆 结束: ${formatDate(endDate) || 'N/A'}` });
 
     // 计算进度
     const expectedDays = pastDates.length;
     const completionRate = expectedDays > 0 ? Math.round((completedCount / expectedDays) * 100) : 0;
     const remainingDays = Math.max(0, CONFIG.baseDaysToTrack - completedCount);
 
-    dv.span(`<br><br>📊 **进度统计:**`);
-    dv.span(`<br>✅ 已完成: ${completedCount}天`);
-    dv.span(`<br>❌ 未完成: ${missedCount}天`);
-    dv.span(`<br>📈 完成率: ${completionRate}%`);
-    dv.span(`<br>🏁 还需完成: ${remainingDays}天<br><br>`);
+    // 4-column grid, content only in first 2 columns
+    const statsGrid = dv.container.createEl('div', { attr: { style: 'display:grid;grid-template-columns:repeat(4,1fr);gap:4px 20px;margin:8px 0 10px;font-size:0.9em;' } });
+    const leftCol = statsGrid.createEl('div');
+    leftCol.createEl('div', { attr: { style: 'font-weight:bold;color:var(--text-muted);font-size:0.8em;margin-bottom:3px;' }, text: '📊 进度统计' });
+    leftCol.createEl('div', { text: `✅ 已完成: ${completedCount}天` });
+    leftCol.createEl('div', { text: `❌ 未完成: ${missedCount}天` });
+    leftCol.createEl('div', { text: `📈 完成率: ${completionRate}%` });
+    leftCol.createEl('div', { text: `🏁 还需完成: ${remainingDays}天` });
+    const rightCol = statsGrid.createEl('div');
+    rightCol.createEl('div', { attr: { style: 'font-weight:bold;color:var(--text-muted);font-size:0.8em;margin-bottom:3px;' }, text: '📅 按年' });
+    for (const [year, s] of Object.entries(yearStats).sort()) {
+        const total = s.c + s.m;
+        const rate = total > 0 ? Math.round((s.c / total) * 100) : 0;
+        rightCol.createEl('div', { text: `${year}: ✅ ${s.c}天 / ❌ ${s.m}天 (${rate}%)` });
+    }
 
     // Cache status and refresh button
-    const cacheInfoEl = dv.container.createEl('div', {
-        attr: { style: 'display:flex; align-items:center; gap:12px; margin-bottom:10px; font-size:0.85em; color:var(--text-muted);' }
-    });
-    if (cachedAt) {
-        const ageMinutes = Math.round((Date.now() - cachedAt.getTime()) / 60000);
-        const ageText = ageMinutes < 60 ? `${ageMinutes}分钟前` : `${Math.round(ageMinutes / 60)}小时前`;
-        cacheInfoEl.createEl('span', { text: `📦 缓存于${ageText}` });
-    }
-    const refreshBtn = cacheInfoEl.createEl('button', { text: '↺ 刷新数据' });
-    refreshBtn.style.cssText = 'padding:2px 10px; border-radius:4px; cursor:pointer; border:1px solid var(--background-modifier-border); background:var(--background-secondary); color:var(--text-normal); font-size:0.85em;';
-    refreshBtn.addEventListener('click', async () => {
-        clearCache();
-        const file = app.workspace.getActiveFile();
-        await app.workspace.activeLeaf.openFile(file, { active: true });
-    });
 
     // ========================================
     // 检查热力图插件是否可用
@@ -390,6 +421,7 @@ try {
 
     try {
         renderHeatmapCalendar(this.container, calendarData);
+        fixAndZoom();
     } catch (e) {
         console.error("Error rendering first calendar:", e);
         dv.span("⚠️ 渲染热力图时出错");
@@ -398,7 +430,6 @@ try {
     // 如果跨年，显示后续年份
     if (endYear > startYear) {
         for (let year = startYear + 1; year <= endYear; year++) {
-            dv.span("<br>");
             
             const calendarDataYear = {
                 year: year,
@@ -414,6 +445,7 @@ try {
             
             try {
                 renderHeatmapCalendar(this.container, calendarDataYear);
+                fixAndZoom();
             } catch (e) {
                 console.error(`Error rendering calendar for year ${year}:`, e);
                 dv.span(`⚠️ 渲染${year}年热力图时出错`);
