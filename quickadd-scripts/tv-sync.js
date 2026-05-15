@@ -9,12 +9,14 @@ module.exports = async (params) => {
 
     const SYNC_FILE_PATH = 'Helper/utils/tvSync.md';
 
-    // Read last_sync from tvSync.md frontmatter
-    const syncPage = dv.page(SYNC_FILE_PATH);
-    const lastSyncRaw = syncPage?.last_sync;
-    const lastSyncDate = lastSyncRaw?.toFormat
-        ? lastSyncRaw
-        : (lastSyncRaw ? dv.date(String(lastSyncRaw)) : null);
+    // Scan a rolling 5-day window so recent backfilled daily-note edits are picked up
+    // without rescanning older daily notes on every sync.
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const fiveDayCutoff = new Date(today);
+    fiveDayCutoff.setDate(fiveDayCutoff.getDate() - 5);
+    const cutoffStr = `${fiveDayCutoff.getFullYear()}-${String(fiveDayCutoff.getMonth() + 1).padStart(2, '0')}-${String(fiveDayCutoff.getDate()).padStart(2, '0')}`;
+    const cutoffDate = dv.date(cutoffStr);
 
     // Shows to process: has 总集数, not complete, not abandoned
     const showPages = dv.pages('"看电视"').where(p => {
@@ -44,10 +46,7 @@ module.exports = async (params) => {
         const startDate = show.开始看日期;
         if (!startDate) { upToDate.push(showName); continue; }
 
-        let scanFrom = startDate;
-        if (lastSyncDate && lastSyncDate > startDate) {
-            scanFrom = lastSyncDate;
-        }
+        const scanFrom = startDate > cutoffDate ? startDate : cutoffDate;
 
         const dailyNotes = dv.pages('"日记"')
             .where(p => {
@@ -91,7 +90,6 @@ module.exports = async (params) => {
     }
 
     // Update last_sync in tvSync.md
-    const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const syncFile = app.vault.getAbstractFileByPath(SYNC_FILE_PATH);
     if (syncFile) {
