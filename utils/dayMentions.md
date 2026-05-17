@@ -1,5 +1,5 @@
 ---
-modified_at: 2026-05-14
+modified_at: 2026-05-16
 ---
 
 ```dataviewjs
@@ -18,7 +18,7 @@ modified_at: 2026-05-14
     const targetYear = dateMatch[1];
     const helperPath = dv.current()?.file?.path;
     const cacheKey = `dayMentions_${targetPath}`;
-    const cacheVersion = '5';
+    const cacheVersion = '16';
 
     if (window[cacheKey] &&
         window[cacheKey].version === cacheVersion &&
@@ -48,6 +48,10 @@ modified_at: 2026-05-14
         if (/^\d{4}-\d{2}$/.test(basename)) return true;
 
         return false;
+    }
+
+    function isWeeklyNote(file) {
+        return file.path.startsWith('周计划/') || /^\d{4}-W\d{2}$/.test(file.basename);
     }
 
     function escapeRegex(s) {
@@ -84,6 +88,8 @@ modified_at: 2026-05-14
             if (keyMatch) currentLabel = keyMatch[1].trim();
 
             if ((linkPattern.test(line) || plainDatePattern.test(line)) && currentLabel) {
+                if (currentLabel === 'modified_at' || currentLabel === 'last_commit' || currentLabel === 'auto_updated') continue;
+
                 if (keyMatch) {
                     return `${currentLabel}: ${keyMatch[2].trim()}`;
                 }
@@ -95,15 +101,37 @@ modified_at: 2026-05-14
         return null;
     }
 
-    function findNonTaskMention(content) {
-        const frontmatterLabel = frontmatterLabelForMention(content);
+    function frontmatterEndOffset(content) {
+        if (!content.startsWith('---\n')) return 0;
+
+        const end = content.indexOf('\n---', 4);
+        return end === -1 ? 0 : end + 4;
+    }
+
+    function findNonTaskMention(content, file) {
+        const weeklyNote = isWeeklyNote(file);
+        const frontmatterLabel = weeklyNote ? null : frontmatterLabelForMention(content);
         if (frontmatterLabel) {
             return { reason: 'frontmatter', label: frontmatterLabel };
         }
 
-        let offset = 0;
-        for (const line of content.split(/\n/)) {
-            if (!isTaskLine(line)) {
+        const searchOffset = frontmatterEndOffset(content);
+        const searchableContent = content.slice(searchOffset);
+
+        let offset = searchOffset;
+        let fenceDepth = 0;
+        for (const line of searchableContent.split(/\n/)) {
+            if (weeklyNote) {
+                const trimmed = line.trim();
+                if (fenceDepth === 0) {
+                    const openMatch = trimmed.match(/^(`{3,})/);
+                    if (openMatch) fenceDepth = openMatch[1].length;
+                } else {
+                    const closeMatch = trimmed.match(/^(`+)\s*$/);
+                    if (closeMatch && closeMatch[1].length >= fenceDepth) fenceDepth = 0;
+                }
+            }
+            if (fenceDepth === 0 && !isTaskLine(line)) {
                 const linkMatch = line.match(linkPattern);
                 if (linkMatch) {
                     return { reason: 'linked', index: offset + (linkMatch.index ?? 0), length: linkMatch[0].length };
@@ -150,7 +178,7 @@ modified_at: 2026-05-14
             continue;
         }
 
-        const mention = findNonTaskMention(content);
+        const mention = findNonTaskMention(content, file);
         if (!mention) continue;
 
         results.push({
@@ -229,24 +257,74 @@ modified_at: 2026-05-14
 
         setEmbedVisible(true);
 
-        const wrap = dv.container.createEl('div', {
-            attr: { style: 'margin:0.4em 0; line-height:1.55;' }
+        // Strip embed wrapper visual. setEmbedVisible has a setTimeout(100ms) that
+        // resets inline styles, so we re-apply with !important at 150ms to win.
+        const clearEmbedBg = () => {
+            let el = dv.container.parentElement;
+            while (el && el !== document.body) {
+                const cls = el.classList;
+                if (cls.contains('internal-embed') || cls.contains('markdown-embed')) {
+                    el.style.setProperty('background',  'transparent', 'important');
+                    el.style.setProperty('border',      'none',        'important');
+                    el.style.setProperty('box-shadow',  'none',        'important');
+                    el.style.setProperty('padding',     '0',           'important');
+                    el.style.setProperty('max-height',  'none',        'important');
+                    break;
+                }
+                if (cls.contains('markdown-embed-content') ||
+                    cls.contains('markdown-preview-view')  ||
+                    cls.contains('markdown-preview-sizer')) {
+                    el.style.setProperty('background', 'transparent', 'important');
+                    el.style.setProperty('padding',    '0',           'important');
+                    el.style.setProperty('max-height', 'none',        'important');
+                }
+                el = el.parentElement;
+            }
+        };
+        clearEmbedBg();
+        setTimeout(clearEmbedBg, 150);
+
+        const card = dv.container.createEl('div', { cls: 'dm-card' });
+
+        // ── Strip
+        const strip = card.createEl('div', { cls: 'dm-strip' });
+        strip.createEl('span', { cls: 'dm-timestamp', text: 'Mentioned in' });
+
+        // ── Body
+        const body = card.createEl('div', { cls: 'dm-body' });
+
+        // ── Header: icon + title block
+        const hdr = body.createEl('div', { cls: 'dm-hdr' });
+        const iconBox = hdr.createEl('div', { cls: 'dm-icon-box' });
+        iconBox.innerHTML = `<svg viewBox="0 0 56 56" width="44" height="44" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 18 H12 A10 10 0 0 0 12 38 H22 A10 10 0 0 0 22 18 Z" fill="#8444c0" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M34 18 H44 A10 10 0 0 1 44 38 H34 A10 10 0 0 1 34 18 Z" fill="#b070e0" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
+            <rect x="20" y="24" width="16" height="8" rx="3" fill="white" opacity="0.9"/>
+            <ellipse cx="15" cy="28" rx="4" ry="5" fill="white" opacity="0.4"/>
+            <ellipse cx="41" cy="28" rx="4" ry="5" fill="white" opacity="0.4"/>
+        </svg>`;
+
+        const titleBlock = hdr.createEl('div');
+        titleBlock.createEl('div', { cls: 'dm-title', text: 'Mentioned In' });
+        titleBlock.createEl('div', {
+            cls: 'dm-count',
+            text: `${items.length} note${items.length !== 1 ? 's' : ''} reference this day`
         });
 
-        wrap.createEl('div', {
-            text: 'Mentioned in',
-            attr: { style: 'font-weight:700; color:var(--text-muted); margin-bottom:0.25em;' }
-        });
-
-        const list = wrap.createEl('ul', {
-            attr: { style: 'margin-top:0.2em; padding-left:1.35em;' }
-        });
+        // ── Items list
+        const itemsEl = body.createEl('div', { cls: 'dm-items' });
 
         for (const item of items) {
-            const li = list.createEl('li');
-            const link = li.createEl('a', {
+            const itemEl = itemsEl.createEl('div', {
+                cls: 'dm-item',
+                attr: { 'data-r': item.reason }
+            });
+
+            itemEl.createEl('span', { cls: 'dm-dot' });
+
+            const link = itemEl.createEl('a', {
+                cls: 'dm-name',
                 text: item.file.basename,
-                cls: 'internal-link',
                 attr: { href: item.file.path }
             });
             link.addEventListener('click', e => {
@@ -254,21 +332,13 @@ modified_at: 2026-05-14
                 app.workspace.openLinkText(item.file.path.replace(/\.md$/, ''), activeFile.path);
             });
 
-            li.createEl('span', {
-                text: ` · ${item.file.parent?.path || '/'}` ,
-                attr: { style: 'color:var(--text-faint); font-size:0.9em;' }
-            });
-
-            li.createEl('span', {
-                text: ` · ${item.reason}`,
-                attr: { style: 'color:var(--text-faint); font-size:0.9em;' }
+            itemEl.createEl('span', {
+                cls: 'dm-folder',
+                text: item.file.parent?.path || '/'
             });
 
             if (item.snippet) {
-                li.createEl('div', {
-                    text: item.snippet,
-                    attr: { style: 'color:var(--text-muted); font-size:0.9em; margin-top:0.1em;' }
-                });
+                itemEl.createEl('span', { cls: 'dm-snip', text: item.snippet });
             }
         }
     }
