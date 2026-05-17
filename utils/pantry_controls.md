@@ -162,60 +162,75 @@ sortBtn.addEventListener('click', async () => {
 });
 
 // --- Show age for Pantry tasks ---
+
+// Walk up from a task element through list nesting to the first el-* block div,
+// then scan backward for the nearest heading — used to detect section (冷藏 vs 冷冻).
+function getPantryTaskSection(taskEl) {
+    let node = taskEl;
+    while (node && !node.className?.startsWith?.('el-')) {
+        node = node.parentElement;
+    }
+    if (!node) return '';
+    let sib = node.previousElementSibling;
+    while (sib) {
+        const h = sib.querySelector('h1,h2,h3,h4,h5,h6');
+        if (h) return h.textContent || '';
+        sib = sib.previousElementSibling;
+    }
+    return '';
+}
+
 function installPantryTaskAgeBadges() {
     if (file.path !== 'Logistics/库存/Pantry.md') return;
 
     const styleId = 'pantry-task-age-style';
-    if (!document.getElementById(styleId)) {
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
-            .pantry-task-age {
-                display: inline-flex;
-                align-items: center;
-                margin: 0 0.5em 0 0;
-                padding: 0 0.45em;
-                border-radius: 999px;
-                font-size: 0.78em;
-                font-weight: 700;
-                line-height: 1.45;
-                white-space: nowrap;
-            }
-            .pantry-task-age.age-green {
-                color: #2f7d45 !important;
-                background: #dff5e6 !important;
-                border: 1px solid #9bd8aa !important;
-            }
-            .pantry-task-age.age-yellow {
-                color: #8a6a00 !important;
-                background: #fff1b8 !important;
-                border: 1px solid #e3c957 !important;
-            }
-            .pantry-task-age.age-red {
-                color: #9b2f2f !important;
-                background: #ffd9d9 !important;
-                border: 1px solid #e39a9a !important;
-            }
-            .pantry-task-age.is-ended {
-                opacity: 0.72;
-            }
-        `;
-        document.head.appendChild(style);
-    }
+    const existing = document.getElementById(styleId);
+    if (existing) existing.remove();
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+        .pantry-task-age {
+            display: inline-flex;
+            align-items: center;
+            margin: 0 0.5em 0 0;
+            padding: 0 0.45em;
+            border-radius: 999px;
+            font-size: 0.78em;
+            font-weight: 700;
+            line-height: 1.45;
+            white-space: nowrap;
+        }
+        .pantry-task-age.age-green {
+            color: #2f7d45 !important;
+            background: #dff5e6 !important;
+            border: 1px solid #9bd8aa !important;
+        }
+        .pantry-task-age.age-yellow {
+            color: #8a6a00 !important;
+            background: #fff1b8 !important;
+            border: 1px solid #e3c957 !important;
+        }
+        .pantry-task-age.age-red {
+            color: #9b2f2f !important;
+            background: #ffd9d9 !important;
+            border: 1px solid #e39a9a !important;
+        }
+        .pantry-task-age.is-ended {
+            opacity: 0.72;
+        }
+    `;
+    document.head.appendChild(style);
 
     const today = window.moment().startOf('day');
 
-    // This helper is embedded near the top of Pantry.md. `closest()` usually finds
-    // only the embed frame, not the host note, so search from the active leaf.
-    const activeRoot = app.workspace.activeLeaf?.view?.containerEl;
-    const roots = [activeRoot, document].filter(Boolean);
-    const taskEls = new Set();
-    for (const root of roots) {
-        root.querySelectorAll('.task-list-item').forEach(el => taskEls.add(el));
-    }
+    // Scope to the active leaf only — using `document` also picks up tasks from
+    // other open panes, which caused double-badging when the same note was open
+    // in more than one leaf.
+    const activeRoot = app.workspace.activeLeaf?.view?.containerEl ?? document;
 
-    taskEls.forEach((taskEl) => {
-        if (taskEl.querySelector('.pantry-task-age')) return;
+    activeRoot.querySelectorAll('.task-list-item').forEach((taskEl) => {
+        // data attribute guard is O(1) and survives nested-element confusion
+        if (taskEl.dataset.pantryBadged) return;
 
         const text = taskEl.innerText ?? '';
         const createdMatch = text.match(/➕\s*(\d{4}-\d{2}-\d{2})/);
@@ -229,21 +244,34 @@ function installPantryTaskAgeBadges() {
         const end = ended?.isValid() ? ended : today;
         const days = Math.max(0, end.diff(created, 'days'));
 
-        const badge = document.createElement('span');
-        const ageClass = days <= 4 ? 'age-green' : days <= 7 ? 'age-yellow' : 'age-red';
+        // Frozen items stay good much longer — use a wider colour band.
+        const section = getPantryTaskSection(taskEl);
+        const isFrozen = section.includes('冷冻');
+        let ageClass;
+        if (isFrozen) {
+            ageClass = days <= 14 ? 'age-green' : days <= 30 ? 'age-yellow' : 'age-red';
+        } else {
+            ageClass = days <= 4 ? 'age-green' : days <= 7 ? 'age-yellow' : 'age-red';
+        }
+
         const ageColors = {
             'age-green': { color: '#2f7d45', background: '#dff5e6', border: '#9bd8aa' },
             'age-yellow': { color: '#8a6a00', background: '#fff1b8', border: '#e3c957' },
             'age-red': { color: '#9b2f2f', background: '#ffd9d9', border: '#e39a9a' }
         };
+        const badge = document.createElement('span');
         badge.className = `pantry-task-age ${ageClass}` + (ended ? ' is-ended' : '');
         badge.textContent = `${days}d`;
         badge.style.setProperty('color', ageColors[ageClass].color, 'important');
         badge.style.setProperty('background-color', ageColors[ageClass].background, 'important');
         badge.style.setProperty('border', `1px solid ${ageColors[ageClass].border}`, 'important');
-        badge.title = ended
-            ? `${days} days from created to ${text.includes('❌') ? 'cancelled' : 'completed'}`
-            : `${days} days since created`;
+        badge.title = isFrozen
+            ? (ended
+                ? `${days} days from frozen to ${text.includes('❌') ? 'cancelled' : 'completed'} (scale: 0–14d green, 15–30d yellow, 30d+ red)`
+                : `${days} days since frozen (scale: 0–14d green, 15–30d yellow, 30d+ red)`)
+            : (ended
+                ? `${days} days from created to ${text.includes('❌') ? 'cancelled' : 'completed'}`
+                : `${days} days since created`);
 
         const checkbox = taskEl.querySelector('input.task-list-item-checkbox, input[type="checkbox"]');
         if (checkbox) {
@@ -251,6 +279,8 @@ function installPantryTaskAgeBadges() {
         } else {
             taskEl.prepend(badge);
         }
+
+        taskEl.dataset.pantryBadged = '1';
     });
 }
 
