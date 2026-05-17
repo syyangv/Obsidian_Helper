@@ -33,7 +33,7 @@ sort by due
 ```
 
 ===
-### Pantry older than 3 days
+### [[Pantry]] older than 3 days
 ```tasks
 not done
 filter by function task.status.symbol !== '>'
@@ -59,14 +59,15 @@ done before <% window.moment(tp.file.title, "GGGG-[W]WW").day(6).add(1, 'day').f
 path does not include 播客
 path does not include 周计划
 path does not include Logistics/库存/Pantry
+path does not include Archive/pantry
 ```
 
 ===
-### Pantry
+### [[Pantry]]
 ```tasks
 done after <% window.moment(tp.file.title, "GGGG-[W]WW").day(0).subtract(1, 'day').format("YYYY-MM-DD") %>
 done before <% window.moment(tp.file.title, "GGGG-[W]WW").day(6).add(1, 'day').format("YYYY-MM-DD") %>
-path includes Logistics/库存/Pantry
+filter by function task.file.path.includes('Logistics/库存/Pantry') || /^archive\/pantry/i.test(task.file.path)
 hide backlink
 ```
 
@@ -81,10 +82,10 @@ const end    = window.moment(String(p["结束日期（周六）"]).slice(0,10), 
 
 const tasks = dv.pages("#RSS")
     .file.tasks
-    .where(t => !t.completed && t.created)
+    .where(t => !t.completed && t.written)
     .where(t => {
-        const created = window.moment(String(t.created).slice(0, 10), "YYYY-MM-DD");
-        return created.isSameOrAfter(start, 'day') && created.isSameOrBefore(end, 'day');
+        const written = window.moment(String(t.written).slice(0, 10), "YYYY-MM-DD");
+        return written.isSameOrAfter(start, 'day') && written.isSameOrBefore(end, 'day');
     });
 
 dv.taskList(tasks);

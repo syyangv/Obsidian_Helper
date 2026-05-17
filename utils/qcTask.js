@@ -79,7 +79,7 @@ module.exports = async (params) => {
     // Build task line
     const tagPart = selectedTag ? " " + selectedTag : "";
     const startPart = startDateStr ? " 🛫 " + startDateStr : "";
-    const taskLine = "- [ ] " + taskText + startPart + " ➕ " + todayStr + tagPart;
+    const taskLine = "- [ ] " + taskText + startPart + " ✍️ " + todayStr + tagPart;
 
     const file = app.vault.getAbstractFileByPath("Quick Capture.md");
     if (!file) {
